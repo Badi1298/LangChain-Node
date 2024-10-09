@@ -36,7 +36,7 @@ const initializeRagChain = async (req) => {
   const pdfPath = path.join(__dirname, req.file.path);
 
   // Load and parse the PDF using PDFLoader
-  const loader = new PDFLoader(pdfPath);
+  const loader = new PDFLoader(pdfPath, { splitPages: false });
   const loadedDocs = await loader.load();
 
   // Split the parsed PDF text into smaller chunks for processing
@@ -57,6 +57,12 @@ const initializeRagChain = async (req) => {
     k: 6, // Return the top 6 most similar chunks
     searchType: "similarity", // Search based on similarity
   });
+
+  // const real = await vectorStoreRetriever.invoke(
+  //   "Is the string 'closing level' present between the sections titled 'Barrier Event' and 'Barrier Observation Period'?"
+  // );
+
+  // console.log(real);
 
   // Set up the language model (ChatGPT) for processing text
   const llm = new ChatOpenAI({
@@ -184,12 +190,13 @@ app.post(
       let result = {
         isLowStrike: "",
         isEuropeanBarrier: "",
+        isAmericanBarrier: "",
       };
 
       // Execute all queries (streams) concurrently
       const [flagChunks] = await Promise.all([
         runnableRagChain.stream(
-          "Does the product have the exact string 'Barrier Event'?"
+          "Does the document have the exact string 'Barrier Event'?"
         ),
       ]);
 
@@ -203,8 +210,7 @@ app.post(
 
       if (!result.isLowStrike) {
         const europeanBarrierChunks = await runnableRagChain.stream(
-          "Does the Redemption section contain the exact string 'Barrier Observation Period'?",
-          {}
+          "Does the document contain the text 'Barrier Observation Period'?"
         );
 
         for await (const chunk of europeanBarrierChunks) {
@@ -215,6 +221,20 @@ app.post(
       console.log(result.isEuropeanBarrier);
 
       result.isEuropeanBarrier = isActiveFlag(result.isEuropeanBarrier);
+
+      if (!result.isLowStrike && !result.isEuropeanBarrier) {
+        const americanBarrierChunks = await runnableRagChain.stream(
+          "Is the string 'closing level' present between the sections titled 'Barrier Event' and 'Barrier Observation Period'?"
+        );
+
+        for await (const chunk of americanBarrierChunks) {
+          result.isAmericanBarrier += chunk;
+        }
+      }
+
+      console.log(result.isAmericanBarrier);
+
+      result.isAmericanBarrier = isActiveFlag(result.isAmericanBarrier);
 
       // Delete the uploaded file from the server after processing is complete
       await fs.unlink(pdfPath);
