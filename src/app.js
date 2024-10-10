@@ -1,7 +1,7 @@
 const cors = require("cors");
 const express = require("express");
 
-const pdfRoutes = require("./src/routes/parsePdfRoutes");
+const pdfRoutes = require("./routes/parsePdfRoutes");
 
 // Set up multer for file uploads
 
