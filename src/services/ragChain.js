@@ -23,8 +23,6 @@ const initializeRagChain = async (pdfPath) => {
   // Load and parse the PDF using PDFLoader
   const loadedDocs = await loader.load();
 
-  console.log(loadedDocs);
-
   // Split the parsed PDF text into smaller chunks for processing
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000, // Each chunk will be 1000 characters long
@@ -50,15 +48,14 @@ const initializeRagChain = async (pdfPath) => {
     temperature: 0, // Use deterministic output (low temperature)
   });
 
-  const customTemplate = `Use the following pieces of context to answer the question at the end.
-      If you don't know the answer, just say that you don't know, don't try to make up an answer.
-      Give really concise answers.
-  
-      {context}
-  
-      Question: {question}
-  
-      Helpful Answer:`;
+  const customTemplate = `Given the following context, please answer concisely.
+    If the information is not found, state "I don't know."
+
+    {context}
+
+    Question: {question}
+
+    Answer:`;
 
   const customRagPrompt = PromptTemplate.fromTemplate(customTemplate);
 

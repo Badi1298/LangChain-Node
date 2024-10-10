@@ -32,7 +32,7 @@ exports.parseProductInformationTermsheet = async (req, res) => {
     const [issuerChunks, notionalChunks, isinChunks, currencyChunks] =
       await Promise.all([
         runnableRagChain.stream(
-          "What is the name of the Issuer inside the General Information section?"
+          "Can you tell me who the Issuer is from the General Information section?"
         ),
         runnableRagChain.stream(
           "What is the Issue Price and Issue Size inside the Product Details section?"
@@ -48,7 +48,7 @@ exports.parseProductInformationTermsheet = async (req, res) => {
       issuer += chunk;
     }
 
-    console.log(issuer);
+    if (issuer.toLocaleLowerCase().includes("i don't know")) throw new Error();
 
     issuer = getIssuer(issuer);
     result.issuer = issuer.id;
@@ -79,6 +79,27 @@ exports.parseProductInformationTermsheet = async (req, res) => {
   }
 };
 
+const Frequencies = Object.freeze({
+  NO_COUPON: 0,
+  MONTHLY: 1,
+  QUARTERLY: 2,
+  SEMI_ANNUALLY: 3,
+  ANNUALLY: 4,
+  OTHER: 5,
+  IN_FINE: 6,
+});
+
+function formatNumber(num) {
+  // Convert the number to a string with at least 2 decimal places
+  let formatted = num.toFixed(2);
+
+  // Remove trailing zeros if they are not necessary
+  formatted = formatted.replace(/(\.\d*?[1-9])0+$/g, "$1"); // Remove extra zeros after meaningful decimals
+  formatted = formatted.replace(/\.00$/g, ""); // Remove ".00" if there are no decimal digits left
+
+  return formatted;
+}
+
 exports.parseProductDetailsTermsheet = async (req, res) => {
   try {
     // Check if a file is uploaded
@@ -95,20 +116,87 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       isLowStrike: "",
       isEuropeanBarrier: "",
       isAmericanBarrier: "",
+      maturity: "",
+      frequency: "",
+      denomination: "",
+      couponLevel: "",
+      underlyings: "",
     };
 
     // Execute all queries (streams) concurrently
-    const [flagChunks] = await Promise.all([
+    const [
+      flagChunks,
+      maturityChunks,
+      frequencyChunks,
+      denominationChunks,
+      couponLevelChunks,
+      underlyingsChunks,
+    ] = await Promise.all([
       runnableRagChain.stream(
         "Does the document have the exact string 'Barrier Event'?"
       ),
+      runnableRagChain.stream(
+        "The difference in days between the Initial Fixing Date and the Final Fixing Date. Display only the number."
+      ),
+      runnableRagChain.stream(
+        "How many Coupon Amount(s) and Coupon Payment Date(s) are there? Display only the amount as a number."
+      ),
+      runnableRagChain.stream(
+        "What is the value of the Denomination? Display only the value without the currency."
+      ),
+      runnableRagChain.stream(
+        "For the Coupon Amount(s) and Coupon Payment Date(s), are the values payed on all the different dates the same? Display only the value without currency if yes, say 'no' otherwise."
+      ),
+      runnableRagChain.stream(
+        "From the table in the PDF under the heading 'Underlying,' extract the text in the first column labeled 'Underlying.' I only need the names of the underlying entities, like 'BANCO SANTANDER SA,' 'BARCLAYS PLC,' and 'CREDIT AGRICOLE SA.' Ignore all other columns and data."
+      ),
     ]);
+
+    for await (const chunk of maturityChunks) {
+      result.maturity += chunk;
+    }
+
+    result.maturity = Math.round(parseInt(result.maturity) / 30);
+
+    for await (const chunk of frequencyChunks) {
+      result.frequency += chunk;
+    }
+
+    result.frequency = result.maturity / parseInt(result.frequency);
+
+    if (result.frequency === result.maturity) {
+      result.frequency = Frequencies.IN_FINE;
+    } else if (result.frequency === 1) {
+      result.frequency = Frequencies.MONTHLY;
+    } else if (result.frequency === 3) {
+      result.frequency = Frequencies.QUARTERLY;
+    } else if (result.frequency === 6) {
+      result.frequency = Frequencies.SEMI_ANNUALLY;
+    } else if (result.frequency === 12) {
+      result.frequency = Frequencies.ANNUALLY;
+    }
+
+    for await (const chunk of denominationChunks) {
+      result.denomination += chunk;
+    }
+
+    for await (const chunk of couponLevelChunks) {
+      result.couponLevel += chunk;
+    }
+
+    result.couponLevel = formatNumber(
+      (100 * parseFloat(result.couponLevel)) / parseFloat(result.denomination)
+    );
+
+    for await (const chunk of underlyingsChunks) {
+      result.underlyings += chunk;
+    }
+
+    console.log(result.underlyings);
 
     for await (const chunk of flagChunks) {
       result.isLowStrike += chunk;
     }
-
-    console.log(result.isLowStrike);
 
     result.isLowStrike = isActiveFlag(result.isLowStrike);
 
@@ -121,8 +209,6 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
         result.isEuropeanBarrier += chunk;
       }
     }
-
-    console.log(result.isEuropeanBarrier);
 
     result.isEuropeanBarrier = isActiveFlag(result.isEuropeanBarrier);
 
@@ -151,8 +237,6 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
         result.isAmericanBarrier += chunk;
       }
     }
-
-    console.log(result.isAmericanBarrier);
 
     result.isAmericanBarrier = isActiveFlag(result.isAmericanBarrier);
 
