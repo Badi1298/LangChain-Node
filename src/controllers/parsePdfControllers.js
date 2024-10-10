@@ -148,7 +148,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
         "For the Coupon Amount(s) and Coupon Payment Date(s), are the values payed on all the different dates the same? Display only the value without currency if yes, say 'no' otherwise."
       ),
       runnableRagChain.stream(
-        "From the table in the PDF under the heading 'Underlying,' extract the text in the first column labeled 'Underlying.' I only need the names of the underlying entities, like 'BANCO SANTANDER SA,' 'BARCLAYS PLC,' and 'CREDIT AGRICOLE SA.' Ignore all other columns and data."
+        "From the table in the PDF under the heading 'Underlying,' extract the text in the first column labeled 'Underlying.' I only need the names of the underlying entities, like 'BANCO SANTANDER SA,' 'BARCLAYS PLC,' and 'CREDIT AGRICOLE SA.'"
       ),
     ]);
 

@@ -42,6 +42,12 @@ const initializeRagChain = async (pdfPath) => {
     searchType: "similarity", // Search based on similarity
   });
 
+  const data = await vectorStoreRetriever.invoke(
+    "From the table in the PDF under the heading 'Underlying', extract the name and Bloomberg Ticker of the underlyings."
+  );
+
+  console.log(data);
+
   // Set up the language model (ChatGPT) for processing text
   const llm = new ChatOpenAI({
     model: "gpt-4o-mini", // GPT model being used
