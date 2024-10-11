@@ -1,0 +1,12 @@
+services:
+  node-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - ./:/app
+    ports:
+      - "8002:8002"
+    env_file:
+      - ./.env
