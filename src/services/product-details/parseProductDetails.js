@@ -8,6 +8,11 @@ const Frequencies = Object.freeze({
   IN_FINE: 6,
 });
 
+const RedemptionTypes = Object.freeze({
+  CASH: 1,
+  PHYSICAL: 2,
+});
+
 const isActiveFlag = (flag) => {
   return flag.toLowerCase().includes("no") ? 1 : 0;
 };
@@ -66,6 +71,17 @@ const calculateCouponLevel = (couponLevel, denomination) => {
   );
 };
 
+const computeRedemptionType = (redemptionType) => {
+  if (
+    redemptionType.toLowerCase().includes("cash settlement") ||
+    redemptionType.toLowerCase().includes("delivery of underlying")
+  ) {
+    return RedemptionTypes.PHYSICAL;
+  }
+
+  return RedemptionTypes.CASH;
+};
+
 const parseUnderlyings = (underlyings) => {
   return underlyings.split(",").map((item) => item.trim());
 };
@@ -79,6 +95,7 @@ module.exports = {
   checkBarrierConditions,
   computeFrequency,
   calculateCouponLevel,
+  computeRedemptionType,
   parseUnderlyings,
   parseInitialFixings,
 };

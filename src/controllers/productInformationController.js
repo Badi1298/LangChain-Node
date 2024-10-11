@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs").promises; // Using fs promises to delete files asynchronously
 
 const { initializeRagChain } = require("../services/initializeRagChain");
-const queries = require("../utils/productInformationQueries");
+const queries = require("../utils/queries/productInformationQueries");
 
 const {
   getIssuer,

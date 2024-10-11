@@ -3,7 +3,7 @@ const fs = require("fs").promises; // Using fs promises to delete files asynchro
 
 const { initializeRagChain } = require("../services/initializeRagChain");
 
-const queries = require("../utils/productDetailsQueries");
+const queries = require("../utils/queries/productDetailsQueries");
 const {
   isActiveFlag,
   parseUnderlyings,
@@ -11,6 +11,7 @@ const {
   parseInitialFixings,
   calculateCouponLevel,
   checkBarrierConditions,
+  computeRedemptionType,
 } = require("../services/product-details/parseProductDetails");
 
 /**
@@ -46,33 +47,48 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       denomination, // Denomination of the product.
       couponLevel, // Coupon level of the product.
       capitalProtectionLevel,
+      redemptionType,
       underlyings, // Information about the underlying assets.
       initialFixings, // Initial fixings of the product.
     ] = await Promise.all(
-      queries[9].map((query) => runnableRagChain.invoke(query))
+      queries[9][9].map((query) => runnableRagChain.invoke(query))
     );
 
     // Construct the result object containing the extracted data.
     const result = {
       isLowStrike: isActiveFlag(isLowStrike), // Determine if the low strike flag is active.
-      maturity: Math.round(parseInt(maturity) / 30), // Convert maturity from days to months.
-      frequency: computeFrequency(
-        // Compute the frequency of payments based on maturity and frequency data.
-        Math.round(parseInt(maturity) / 30),
-        frequency
-      ),
-      denomination, // Denomination of the product.
-      couponLevel: calculateCouponLevel(couponLevel, denomination), // Calculate the coupon level based on the coupon and denomination.
-      capitalProtectionLevel,
       underlyings: parseUnderlyings(underlyings), // Parse the underlying asset information.
       initialFixings: parseInitialFixings(initialFixings), // Parse the initial fixings of the product.
     };
+
+    const prefillPanel = [
+      {
+        key: "MATU",
+        value: Math.round(parseInt(maturity) / 30),
+      },
+      {
+        key: "FREQ",
+        value: computeFrequency(Math.round(parseInt(maturity) / 30), frequency),
+      },
+      {
+        key: "CPN_LEVEL_PP",
+        value: calculateCouponLevel(couponLevel, denomination),
+      },
+      {
+        key: "K_PROTECT_LEVEL",
+        value: capitalProtectionLevel,
+      },
+      {
+        key: "CASH_PHY",
+        value: computeRedemptionType(redemptionType),
+      },
+    ];
 
     // Perform additional checks on barrier conditions related to the product.
     await checkBarrierConditions(result, runnableRagChain);
 
     // Send the extracted data back to the client as a successful JSON response.
-    res.json({ success: true, data: result });
+    res.json({ success: true, data: result, prefillPanel });
   } catch (error) {
     // Log the error details in the server console.
     console.error(error);
