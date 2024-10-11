@@ -45,6 +45,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       frequency, // Frequency of coupon payments.
       denomination, // Denomination of the product.
       couponLevel, // Coupon level of the product.
+      capitalProtectionLevel,
       underlyings, // Information about the underlying assets.
       initialFixings, // Initial fixings of the product.
     ] = await Promise.all(
@@ -62,15 +63,13 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       ),
       denomination, // Denomination of the product.
       couponLevel: calculateCouponLevel(couponLevel, denomination), // Calculate the coupon level based on the coupon and denomination.
+      capitalProtectionLevel,
       underlyings: parseUnderlyings(underlyings), // Parse the underlying asset information.
       initialFixings: parseInitialFixings(initialFixings), // Parse the initial fixings of the product.
     };
 
     // Perform additional checks on barrier conditions related to the product.
     await checkBarrierConditions(result, runnableRagChain);
-
-    // Delete the uploaded PDF file from the server after processing.
-    await fs.unlink(pdfPath);
 
     // Send the extracted data back to the client as a successful JSON response.
     res.json({ success: true, data: result });
