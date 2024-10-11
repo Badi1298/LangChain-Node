@@ -13,7 +13,7 @@ const {
 } = require("@langchain/core/runnables");
 const { formatDocumentsAsString } = require("langchain/util/document");
 
-const initializeRag = async (pdfPath) => {
+const initializeRagChain = async (pdfPath) => {
   // Get the path of the uploaded PDF file
 
   const loader = new PDFLoader(pdfPath, {
@@ -81,4 +81,4 @@ const initializeRag = async (pdfPath) => {
   return runnableRagChain;
 };
 
-module.exports = { initializeRag };
+module.exports = { initializeRagChain };

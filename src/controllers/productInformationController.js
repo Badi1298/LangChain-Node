@@ -1,69 +1,81 @@
 const path = require("path");
 const fs = require("fs").promises; // Using fs promises to delete files asynchronously
 
-const { initializeRag } = require("../services/initializeRag");
+const { initializeRagChain } = require("../services/initializeRagChain");
+const queries = require("../utils/productInformationQueries");
 
 const {
   getIssuer,
   isNotional,
 } = require("../services/product-information/parseProductInformation");
 
+/**
+ * Parses product information from an uploaded PDF file and extracts details like
+ * issuer, notional, ISIN, and currency using a RAG (Retrieval-Augmented Generation) chain.
+ *
+ * @param {Object} req - The request object containing the uploaded file.
+ * @param {Object} res - The response object used to send the result or errors back to the client.
+ *
+ * @returns {void}
+ *
+ * @throws Will throw an error if no file is uploaded, if an invalid response is returned by the RAG chain,
+ * or if there is an issue with PDF processing or file deletion.
+ */
 exports.parseProductInformationTermsheet = async (req, res) => {
   try {
-    // Check if a file is uploaded
+    // Check if a file has been uploaded with the request.
     if (!req.file) {
+      // Return a 400 Bad Request response if no file is found.
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // Get the full file path of the uploaded PDF.
     const pdfPath = path.join(process.cwd(), req.file.path);
 
-    // Initialize the RAG Chain
-    const runnableRagChain = await initializeRag(pdfPath);
+    // Initialize the Retrieval-Augmented Generation (RAG) chain to process the PDF.
+    const runnableRagChain = await initializeRagChain(pdfPath);
 
-    // Initialize result object to store extracted data
+    // Execute all query streams concurrently to extract issuer, notional, ISIN, and currency data.
+    const [issuerData, notional, isin, currency] = await Promise.all(
+      queries[9].map((query) => runnableRagChain.invoke(query))
+    );
+
+    // Check if the issuer data contains an invalid response (e.g., "I don't know").
+    if (issuerData.toLocaleLowerCase().includes("i don't know")) {
+      // Throw an error if the response is invalid.
+      throw new Error();
+    }
+
+    // Construct the result object containing the extracted data.
     let result = {
-      issuer: null,
-      issuer_code: "",
-      notional: "",
-      isin: "",
-      currency: "",
+      issuer: getIssuer(issuerData).id, // Extract the issuer ID.
+      issuer_code: getIssuer(issuerData).issuer_code, // Extract the issuer code.
+      notional: isNotional(notional), // Validate and extract the notional value.
+      isin, // International Securities Identification Number (ISIN).
+      currency, // Currency information.
     };
 
-    let issuer = "";
-
-    // Execute all queries (streams) concurrently
-    const [issuerData, notional, isin, currency] = await Promise.all([
-      runnableRagChain.invoke(
-        "Can you tell me who the Issuer is from the General Information section?"
-      ),
-      runnableRagChain.invoke(
-        "What is the Issue Price and Issue Size inside the Product Details section?"
-      ),
-      runnableRagChain.invoke(
-        "What is the ISIN found inside the Product Details section? Display only the ISIN itself."
-      ),
-      runnableRagChain.invoke("What is the currency?"),
-    ]);
-
-    if (issuerData.toLocaleLowerCase().includes("i don't know"))
-      throw new Error();
-
-    issuer = getIssuer(issuerData);
-    result.issuer = issuer.id;
-    result.issuer_code = issuer.issuer_code;
-
-    result.notional = isNotional(notional);
-    result.isin = isin;
-    result.currency = currency;
-
-    // Delete the uploaded file from the server after processing
+    // Delete the uploaded PDF file from the server after processing.
     await fs.unlink(pdfPath);
 
-    // Send the result back to the client
+    // Send the extracted data back to the client as a successful JSON response.
     res.json({ success: true, data: result });
   } catch (error) {
-    // Log the error and send an error response
+    // Log the error details in the server console.
     console.error(error);
+
+    // Send a 500 Internal Server Error response with an appropriate error message.
     res.status(500).json({ message: "Error loading PDF" });
+  } finally {
+    // Ensure the uploaded file is deleted, even if an error occurs.
+    if (req.file) {
+      const pdfPath = path.join(process.cwd(), req.file.path);
+      try {
+        await fs.unlink(pdfPath);
+      } catch (unlinkError) {
+        // Log any errors that occur during file deletion.
+        console.error("Error deleting file:", unlinkError.message);
+      }
+    }
   }
 };
