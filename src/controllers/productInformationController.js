@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs").promises; // Using fs promises to delete files asynchronously
 
-const { initializeRagChain } = require("../services/ragChain");
+const { initializeRag } = require("../services/initializeRag");
 
 const {
   getIssuer,
@@ -18,7 +18,7 @@ exports.parseProductInformationTermsheet = async (req, res) => {
     const pdfPath = path.join(process.cwd(), req.file.path);
 
     // Initialize the RAG Chain
-    const runnableRagChain = await initializeRagChain(pdfPath);
+    const runnableRagChain = await initializeRag(pdfPath);
 
     // Initialize result object to store extracted data
     let result = {

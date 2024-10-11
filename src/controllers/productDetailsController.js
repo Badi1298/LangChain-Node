@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs").promises; // Using fs promises to delete files asynchronously
 
-const { initializeRagChain } = require("../services/ragChain");
+const { initializeRag } = require("../services/initializeRag");
 
 const queries = require("../utils/productDetailsQueries");
 const {
@@ -18,7 +18,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
 
     const pdfPath = path.join(process.cwd(), req.file.path);
-    const runnableRagChain = await initializeRagChain(pdfPath);
+    const runnableRagChain = await initializeRag(pdfPath);
 
     const [
       isLowStrike,

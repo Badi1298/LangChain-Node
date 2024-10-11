@@ -1,4 +1,4 @@
-const issuers_list = require("../issuerList");
+const issuers_list = require("../../utils/issuerList");
 
 const getIssuer = (issuer) => {
   return issuers_list.find((iss) => issuer.includes(iss.name));
