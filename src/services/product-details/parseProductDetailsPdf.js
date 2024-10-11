@@ -12,6 +12,27 @@ const isActiveFlag = (flag) => {
   return flag.toLowerCase().includes("no") ? 1 : 0;
 };
 
+const checkBarrierConditions = async (result, runnableRagChain) => {
+  if (result.isLowStrike) return;
+
+  const isEuropeanBarrier = await runnableRagChain.invoke(
+    "Does the document contain the text 'Barrier Observation Period'?"
+  );
+  result.isEuropeanBarrier = isActiveFlag(isEuropeanBarrier);
+
+  if (!result.isEuropeanBarrier) {
+    const errorCheck = await runnableRagChain.invoke(
+      "Is the Barrier Observation Period start date different from the Barrier Observation Period end date?"
+    );
+    if (errorCheck.toLowerCase().includes("no")) throw new Error();
+
+    const isAmericanBarrier = await runnableRagChain.invoke(
+      "Is the string 'closing level' present between the sections titled 'Barrier Event' and 'Barrier Observation Period'?"
+    );
+    result.isAmericanBarrier = isActiveFlag(isAmericanBarrier);
+  }
+};
+
 const computeFrequency = (maturity, frequency) => {
   const freq = maturity / parseInt(frequency);
 
@@ -55,6 +76,7 @@ const parseInitialFixings = (initialFixings) => {
 
 module.exports = {
   isActiveFlag,
+  checkBarrierConditions,
   computeFrequency,
   calculateCouponLevel,
   parseUnderlyings,
