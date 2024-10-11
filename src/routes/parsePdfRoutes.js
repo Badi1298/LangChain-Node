@@ -2,18 +2,19 @@ const express = require("express");
 const upload = require("../middleware/upload");
 const router = express.Router();
 
-const pdfController = require("../controllers/parsePdfControllers");
+const productDetailsController = require("../controllers/productDetailsController");
+const productInformationController = require("../controllers/productInformationController");
 
 router.post(
   "/parse-product-information-termsheet",
   upload.single("pdf"),
-  pdfController.parseProductInformationTermsheet
+  productInformationController.parseProductInformationTermsheet
 );
 
 router.post(
   "/parse-product-details-termsheet",
   upload.single("pdf"),
-  pdfController.parseProductDetailsTermsheet
+  productDetailsController.parseProductDetailsTermsheet
 );
 
 module.exports = router;
