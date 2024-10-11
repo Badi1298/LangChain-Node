@@ -19,14 +19,16 @@ const initializeRagChain = async (pdfPath) => {
   const loader = new PDFLoader(pdfPath, {
     // you may need to add `.then(m => m.default)` to the end of the import
     pdfjs: () => import("pdfjs-dist/legacy/build/pdf.mjs"),
+    splitPages: false,
+    parsedItemSeparator: "",
   });
   // Load and parse the PDF using PDFLoader
   const loadedDocs = await loader.load();
 
   // Split the parsed PDF text into smaller chunks for processing
   const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000, // Each chunk will be 1000 characters long
-    chunkOverlap: 200, // Overlap 200 characters between chunks to preserve context
+    chunkSize: 2000, // Each chunk will be 1000 characters long
+    chunkOverlap: 400, // Overlap 200 characters between chunks to preserve context
   });
   const allSplits = await splitter.splitDocuments(loadedDocs);
 
@@ -41,6 +43,12 @@ const initializeRagChain = async (pdfPath) => {
     k: 6, // Return the top 6 most similar chunks
     searchType: "similarity", // Search based on similarity
   });
+
+  // const data = await vectorStoreRetriever.invoke(
+  //   "Inside the table 'Underlyings', what is the name of the underlyings? Keywords to look for in the provided context are Underlying, Related Exchange, Bloomberg Ticker. Somewhere under those, you should find the underlyings. Underlying, when used in equity trading, is the common stock. Only display the underlying names separated by commas."
+  // );
+
+  // console.log(data);
 
   // Set up the language model (ChatGPT) for processing text
   const llm = new ChatOpenAI({

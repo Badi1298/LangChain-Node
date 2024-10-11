@@ -2,7 +2,13 @@ const path = require("path");
 const fs = require("fs").promises; // Using fs promises to delete files asynchronously
 
 const { initializeRagChain } = require("../services/ragChain");
-const { isActiveFlag } = require("../services/parseProductDetailsPdf");
+const {
+  isActiveFlag,
+  parseUnderlyings,
+  computeFrequency,
+  parseInitialFixings,
+  calculateCouponLevel,
+} = require("../services/product-details/parseProductDetailsPdf");
 const { getIssuer, isNotional } = require("../services/parseAddProductPdf");
 
 exports.parseProductInformationTermsheet = async (req, res) => {
@@ -79,16 +85,6 @@ exports.parseProductInformationTermsheet = async (req, res) => {
   }
 };
 
-const Frequencies = Object.freeze({
-  NO_COUPON: 0,
-  MONTHLY: 1,
-  QUARTERLY: 2,
-  SEMI_ANNUALLY: 3,
-  ANNUALLY: 4,
-  OTHER: 5,
-  IN_FINE: 6,
-});
-
 function formatNumber(num) {
   // Convert the number to a string with at least 2 decimal places
   let formatted = num.toFixed(2);
@@ -120,79 +116,56 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       frequency: "",
       denomination: "",
       couponLevel: "",
-      underlyings: "",
+      underlyings: [],
+      initialFixings: [],
     };
 
     // Execute all queries (streams) concurrently
     const [
       flagChunks,
-      maturityChunks,
-      frequencyChunks,
-      denominationChunks,
-      couponLevelChunks,
-      underlyingsChunks,
+      maturity,
+      frequency,
+      denomination,
+      couponLevel,
+      underlyings,
+      initialFixings,
     ] = await Promise.all([
       runnableRagChain.stream(
         "Does the document have the exact string 'Barrier Event'?"
       ),
-      runnableRagChain.stream(
+      runnableRagChain.invoke(
         "The difference in days between the Initial Fixing Date and the Final Fixing Date. Display only the number."
       ),
-      runnableRagChain.stream(
+      runnableRagChain.invoke(
         "How many Coupon Amount(s) and Coupon Payment Date(s) are there? Display only the amount as a number."
       ),
-      runnableRagChain.stream(
+      runnableRagChain.invoke(
         "What is the value of the Denomination? Display only the value without the currency."
       ),
-      runnableRagChain.stream(
+      runnableRagChain.invoke(
         "For the Coupon Amount(s) and Coupon Payment Date(s), are the values payed on all the different dates the same? Display only the value without currency if yes, say 'no' otherwise."
       ),
-      runnableRagChain.stream(
-        "From the table in the PDF under the heading 'Underlying,' extract the text in the first column labeled 'Underlying.' I only need the names of the underlying entities, like 'BANCO SANTANDER SA,' 'BARCLAYS PLC,' and 'CREDIT AGRICOLE SA.' Ignore all other columns and data."
+      runnableRagChain.invoke(
+        "What are the name and the Bloomberg Tickers of the underlyings inside the Underlying table? Display the tickers only."
+      ),
+      runnableRagChain.invoke(
+        "What are the Initial Fixing Level (100%) of the underlyings inside the Underlying table? Display only the fixings values without currency separated by commas."
       ),
     ]);
 
-    for await (const chunk of maturityChunks) {
-      result.maturity += chunk;
-    }
+    result.maturity = Math.round(parseInt(maturity) / 30);
+    result.frequency = computeFrequency(result.maturity, frequency);
 
-    result.maturity = Math.round(parseInt(result.maturity) / 30);
+    result.denomination = denomination;
+    result.couponLevel = calculateCouponLevel(couponLevel, result.denomination);
 
-    for await (const chunk of frequencyChunks) {
-      result.frequency += chunk;
-    }
+    console.log(underlyings);
+    result.underlyings = parseUnderlyings(underlyings);
 
-    result.frequency = result.maturity / parseInt(result.frequency);
+    console.log(initialFixings);
+    result.initialFixings = parseInitialFixings(initialFixings);
 
-    if (result.frequency === result.maturity) {
-      result.frequency = Frequencies.IN_FINE;
-    } else if (result.frequency === 1) {
-      result.frequency = Frequencies.MONTHLY;
-    } else if (result.frequency === 3) {
-      result.frequency = Frequencies.QUARTERLY;
-    } else if (result.frequency === 6) {
-      result.frequency = Frequencies.SEMI_ANNUALLY;
-    } else if (result.frequency === 12) {
-      result.frequency = Frequencies.ANNUALLY;
-    }
-
-    for await (const chunk of denominationChunks) {
-      result.denomination += chunk;
-    }
-
-    for await (const chunk of couponLevelChunks) {
-      result.couponLevel += chunk;
-    }
-
-    result.couponLevel = formatNumber(
-      (100 * parseFloat(result.couponLevel)) / parseFloat(result.denomination)
-    );
-
-    for await (const chunk of underlyingsChunks) {
-      result.underlyings += chunk;
-    }
-
-    console.log(result.underlyings);
+    // -----------------------------------------------------------
 
     for await (const chunk of flagChunks) {
       result.isLowStrike += chunk;
@@ -224,9 +197,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       }
 
       if (error.toLocaleLowerCase().includes("no")) {
-        res.status(500).json({
-          message: "Barrier Observation Period dates are the same.",
-        });
+        throw new Error();
       }
 
       const americanBarrierChunks = await runnableRagChain.stream(
