@@ -3,7 +3,7 @@ const fs = require("fs").promises; // Using fs promises to delete files asynchro
 
 const { initializeRagChain } = require("../services/initializeRagChain");
 
-const queries = require("../utils/queries/productDetailsQueries");
+const queryMap = require("../utils/queries/productDetailsQueries");
 const {
   isActiveFlag,
   parseUnderlyings,
@@ -33,62 +33,73 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    const { issuerId, categoryId } = req.body;
+
     // Get the full file path of the uploaded PDF.
     const pdfPath = path.join(process.cwd(), req.file.path);
 
     // Initialize the Retrieval-Augmented Generation (RAG) chain to process the PDF.
     const runnableRagChain = await initializeRagChain(pdfPath);
 
-    // Execute all query streams concurrently to extract specific product details.
-    const [
-      isLowStrike, // Low strike flag.
-      maturity, // Maturity of the product in days.
-      frequency, // Frequency of coupon payments.
-      denomination, // Denomination of the product.
-      couponLevel, // Coupon level of the product.
-      capitalProtectionLevel,
-      redemptionType,
-      underlyings, // Information about the underlying assets.
-      initialFixings, // Initial fixings of the product.
-    ] = await Promise.all(
-      queries[9][9].map((query) => runnableRagChain.invoke(query))
+    const queries = queryMap[issuerId][categoryId]; // Get the queries for issuer 9 and product type 9
+
+    const results = await Promise.all(
+      Object.values(queries).map((query) => runnableRagChain.invoke(query))
     );
 
-    // Construct the result object containing the extracted data.
-    const result = {
-      isLowStrike: isActiveFlag(isLowStrike), // Determine if the low strike flag is active.
-      underlyings: parseUnderlyings(underlyings), // Parse the underlying asset information.
-      initialFixings: parseInitialFixings(initialFixings), // Parse the initial fixings of the product.
+    // Map the results to their corresponding query names
+    const ragResults = Object.keys(queries).reduce((acc, key, index) => {
+      acc[key] = results[index];
+      return acc;
+    }, {});
+
+    const flags = {
+      isLowStrike: isActiveFlag(ragResults.isLowStrike),
+    };
+
+    const underlyingsData = {
+      underlyings: parseUnderlyings(ragResults.underlyings),
+      initialFixings: parseInitialFixings(ragResults.initialFixings),
     };
 
     const prefillPanel = [
       {
         key: "MATU",
-        value: Math.round(parseInt(maturity) / 30),
+        value: Math.round(parseInt(ragResults.maturity) / 30),
       },
       {
         key: "FREQ",
-        value: computeFrequency(Math.round(parseInt(maturity) / 30), frequency),
+        value: computeFrequency(
+          Math.round(parseInt(ragResults.maturity) / 30),
+          ragResults.frequency
+        ),
       },
       {
         key: "CPN_LEVEL_PP",
-        value: calculateCouponLevel(couponLevel, denomination),
+        value: calculateCouponLevel(
+          ragResults.couponLevel,
+          ragResults.denomination
+        ),
       },
       {
         key: "K_PROTECT_LEVEL",
-        value: capitalProtectionLevel,
+        value: ragResults.capitalProtectionLevel,
       },
       {
         key: "CASH_PHY",
-        value: computeRedemptionType(redemptionType),
+        value: computeRedemptionType(ragResults.redemptionType),
       },
     ];
 
     // Perform additional checks on barrier conditions related to the product.
-    await checkBarrierConditions(result, runnableRagChain);
+    await checkBarrierConditions(flags, runnableRagChain);
 
     // Send the extracted data back to the client as a successful JSON response.
-    res.json({ success: true, data: result, prefillPanel });
+    res.json({
+      flags,
+      prefillPanel,
+      underlyings: underlyingsData,
+    });
   } catch (error) {
     // Log the error details in the server console.
     console.error(error);
