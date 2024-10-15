@@ -25,17 +25,17 @@ const checkBarrierConditions = async (result, runnableRagChain) => {
   );
   result.isEuropeanBarrier = isActiveFlag(isEuropeanBarrier);
 
-  if (!result.isEuropeanBarrier) {
-    const errorCheck = await runnableRagChain.invoke(
-      "Is the Barrier Observation Period start date different from the Barrier Observation Period end date?"
-    );
-    if (errorCheck.toLowerCase().includes("no")) throw new Error();
+  if (result.isEuropeanBarrier) return;
 
-    const isAmericanBarrier = await runnableRagChain.invoke(
-      "Is the string 'closing level' present between the sections titled 'Barrier Event' and 'Barrier Observation Period'?"
-    );
-    result.isAmericanBarrier = isActiveFlag(isAmericanBarrier);
-  }
+  // const errorCheck = await runnableRagChain.invoke(
+  //   "Is the Barrier Observation Period start date different from the Barrier Observation Period end date?"
+  // );
+  // if (errorCheck.toLowerCase().includes("no")) throw new Error();
+
+  const isAmericanBarrier = await runnableRagChain.invoke(
+    "Is the string 'closing level' present between the sections titled 'Barrier Event' and 'Barrier Observation Period'?"
+  );
+  result.isAmericanBarrier = isActiveFlag(isAmericanBarrier);
 };
 
 const computeFrequency = (maturity, frequency) => {

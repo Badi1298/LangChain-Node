@@ -56,8 +56,10 @@ const initializeRagChain = async (pdfPath) => {
     temperature: 0, // Use deterministic output (low temperature)
   });
 
-  const customTemplate = `Given the following context, please answer concisely.
-    If the information is not found, state "I don't know."
+  const customTemplate = `You are a financial expert. Given the following context from the document, 
+    please answer the question as accurately and concisely as possible. If the information is not directly 
+    found in the context, use your financial knowledge to deduce the answer. If you are unable to answer 
+    based on the context or your knowledge, respond with "I don't know."
 
     {context}
 

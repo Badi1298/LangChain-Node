@@ -7,12 +7,10 @@ const queryMap = require("../utils/queries/productDetailsQueries");
 const {
   isActiveFlag,
   parseUnderlyings,
-  computeFrequency,
   parseInitialFixings,
-  calculateCouponLevel,
   checkBarrierConditions,
-  computeRedemptionType,
 } = require("../services/product-details/parseProductDetails");
+const { buildPrefillPanel } = require("../utils/prefillPanel/prefillBuild");
 
 /**
  * Parses product details from an uploaded PDF file, extracting information such as
@@ -62,34 +60,12 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       initialFixings: parseInitialFixings(ragResults.initialFixings),
     };
 
-    const prefillPanel = [
-      {
-        key: "MATU",
-        value: Math.round(parseInt(ragResults.maturity) / 30),
-      },
-      {
-        key: "FREQ",
-        value: computeFrequency(
-          Math.round(parseInt(ragResults.maturity) / 30),
-          ragResults.frequency
-        ),
-      },
-      {
-        key: "CPN_LEVEL_PP",
-        value: calculateCouponLevel(
-          ragResults.couponLevel,
-          ragResults.denomination
-        ),
-      },
-      {
-        key: "K_PROTECT_LEVEL",
-        value: ragResults.capitalProtectionLevel,
-      },
-      {
-        key: "CASH_PHY",
-        value: computeRedemptionType(ragResults.redemptionType),
-      },
-    ];
+    const prefillPanel = buildPrefillPanel(categoryId, ragResults);
+
+    const events = {
+      type: ragResults.eventsType,
+      events: ragResults.events,
+    };
 
     // Perform additional checks on barrier conditions related to the product.
     await checkBarrierConditions(flags, runnableRagChain);
@@ -99,6 +75,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       flags,
       prefillPanel,
       underlyings: underlyingsData,
+      events,
     });
   } catch (error) {
     // Log the error details in the server console.
