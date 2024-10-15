@@ -44,11 +44,11 @@ const initializeRagChain = async (pdfPath) => {
     searchType: "similarity", // Search based on similarity
   });
 
-  // const data = await vectorStoreRetriever.invoke(
-  //   "Inside the table 'Underlyings', what is the name of the underlyings? Keywords to look for in the provided context are Underlying, Related Exchange, Bloomberg Ticker. Somewhere under those, you should find the underlyings. Underlying, when used in equity trading, is the common stock. Only display the underlying names separated by commas."
-  // );
+  const data = await vectorStoreRetriever.invoke(
+    "What is the Initial Fixing Level (100%) of the underlyings inside the Underlying table?"
+  );
 
-  // console.log(data);
+  console.log(data);
 
   // Set up the language model (ChatGPT) for processing text
   const llm = new ChatOpenAI({

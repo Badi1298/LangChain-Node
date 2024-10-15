@@ -40,11 +40,13 @@ exports.parseProductInformationTermsheet = async (req, res) => {
       queries[9].map((query) => runnableRagChain.invoke(query))
     );
 
-    // Check if the issuer data contains an invalid response (e.g., "I don't know").
-    if (issuerData.toLocaleLowerCase().includes("i don't know")) {
-      // Throw an error if the response is invalid.
-      throw new Error();
-    }
+    // // Check if the issuer data contains an invalid response (e.g., "I don't know").
+    // if (issuerData.toLocaleLowerCase().includes("i don't know")) {
+    //   // Throw an error if the response is invalid.
+    //   throw new Error();
+    // }
+
+    console.log(issuerData, notional, isin, currency);
 
     // Construct the result object containing the extracted data.
     let result = {

@@ -56,7 +56,7 @@ const computeFrequency = (maturity, frequency) => {
 
 function formatNumber(num) {
   // Convert the number to a string with at least 2 decimal places
-  let formatted = num.toFixed(2);
+  let formatted = num.toFixed(4);
 
   // Remove trailing zeros if they are not necessary
   formatted = formatted.replace(/(\.\d*?[1-9])0+$/g, "$1"); // Remove extra zeros after meaningful decimals
@@ -83,7 +83,9 @@ const computeRedemptionType = (redemptionType) => {
 };
 
 const parseUnderlyings = (underlyings) => {
-  return underlyings.split(",").map((item) => item.trim());
+  return underlyings
+    .split(",")
+    .map((item) => item.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim());
 };
 
 const parseInitialFixings = (initialFixings) => {

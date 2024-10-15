@@ -17,7 +17,7 @@ module.exports = {
       redemptionType:
         "What is the Settlement Type(s)? Display only the Settlement Type(s) itself.",
       underlyings:
-        "What are the name and the Bloomberg Tickers of the underlyings inside the Underlying table? Display the tickers only.",
+        "What are the underlyings inside the Underlyings table? Display nothin but their Bloomberg Tickers.",
       initialFixings:
         "What is the Initial Fixing Level (100%) of the underlyings inside the Underlying table? Display only the Initial Fixing values without currency, separated by commas. Do not display any other Level, just the Initial Fixing Level. Be careful not to display the Barrier Level, Strike Level, Autocall Trigger Level or any other level instead of the Initial Fixing Level by accident.",
       eventsType:
