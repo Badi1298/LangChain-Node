@@ -45,14 +45,14 @@ const initializeRagChain = async (pdfPath) => {
   });
 
   const data = await vectorStoreRetriever.invoke(
-    "What is the Initial Fixing Level (100%) of the underlyings inside the Underlying table?"
+    "What is the Initial Fixing Level of the underlyings inside the Underlying table?"
   );
 
   console.log(data);
 
   // Set up the language model (ChatGPT) for processing text
   const llm = new ChatOpenAI({
-    model: "gpt-4o-mini", // GPT model being used
+    model: "gpt-4o", // GPT model being used
     temperature: 0, // Use deterministic output (low temperature)
   });
 

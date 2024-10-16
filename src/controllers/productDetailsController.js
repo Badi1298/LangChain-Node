@@ -51,6 +51,8 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       return acc;
     }, {});
 
+    console.log(ragResults);
+
     const flags = {
       isLowStrike: isActiveFlag(ragResults.isLowStrike),
     };
@@ -75,7 +77,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
       flags,
       prefillPanel,
       underlyings: underlyingsData,
-      events,
+      valoren: ragResults.valoren,
     });
   } catch (error) {
     // Log the error details in the server console.

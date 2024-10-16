@@ -57,9 +57,6 @@ exports.parseProductInformationTermsheet = async (req, res) => {
       currency, // Currency information.
     };
 
-    // Delete the uploaded PDF file from the server after processing.
-    await fs.unlink(pdfPath);
-
     // Send the extracted data back to the client as a successful JSON response.
     res.json({ success: true, data: result });
   } catch (error) {

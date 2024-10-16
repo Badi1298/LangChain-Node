@@ -1,17 +1,4 @@
-const Frequencies = Object.freeze({
-  NO_COUPON: 0,
-  MONTHLY: 1,
-  QUARTERLY: 2,
-  SEMI_ANNUALLY: 3,
-  ANNUALLY: 4,
-  OTHER: 5,
-  IN_FINE: 6,
-});
-
-const RedemptionTypes = Object.freeze({
-  CASH: 1,
-  PHYSICAL: 2,
-});
+const { Frequencies, RedemptionTypes } = require("../../../config/constants");
 
 const isActiveFlag = (flag) => {
   return flag.toLowerCase().includes("no") ? 1 : 0;
@@ -73,8 +60,7 @@ const calculateCouponLevel = (couponLevel, denomination) => {
 
 const computeRedemptionType = (redemptionType) => {
   if (
-    redemptionType.toLowerCase().includes("cash settlement") ||
-    redemptionType.toLowerCase().includes("delivery of underlying")
+    redemptionType.toLowerCase() === "cash settlement or delivery of underlying"
   ) {
     return RedemptionTypes.PHYSICAL;
   }
