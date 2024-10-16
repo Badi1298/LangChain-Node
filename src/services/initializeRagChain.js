@@ -76,7 +76,7 @@ const initializeRagChain = async (pdfPath) => {
   });
   const allSplits = await splitter.splitDocuments(loadedDocs);
 
-  console.log(allSplits);
+  // console.log(allSplits);
 
   // Create an in-memory vector store from the document chunks using embeddings
   const inMemoryVectorStore = await MemoryVectorStore.fromDocuments(
@@ -91,7 +91,7 @@ const initializeRagChain = async (pdfPath) => {
   });
 
   // const data = await vectorStoreRetriever.invoke(
-  //   "What is the Initial Fixing Level of the underlyings inside the Underlying table?"
+  //   "What is the Settlement Type(s) inside the General Information section?"
   // );
 
   // console.log(data);

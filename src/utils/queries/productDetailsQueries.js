@@ -12,10 +12,10 @@ module.exports = {
         "What is the value of the Denomination? Display only the value without the currency.",
       couponLevel:
         "For the Coupon Amount(s) and Coupon Payment Date(s), are the values payed on all the different dates the same? Display only the value without currency if yes, say 'no' otherwise.",
-      capitalProtectionLevel: `Is the product a Low Strike? If yes, then display the Strike Level (XXX%), 
+      capitalProtectionLevel: `Is the product a Low Strike? If yes, then display the Strike Level (XXX%),
         else display the Barrier Level (XXX%). Display only the value, without a '%', nothing else.`,
       redemptionType:
-        "What is the Settlement Type(s)? Display only the Settlement Type(s) itself.",
+        "What is the Settlement Type(s) inside the General Information section?",
       underlyings:
         "What are the underlyings inside the Underlyings table? Display nothin but their Bloomberg Tickers separated by commas.",
       initialFixings:

@@ -53,7 +53,7 @@ function formatNumber(num) {
 }
 
 const calculateCouponLevel = (couponLevel, denomination) => {
-  return formatNumber(
+  return +formatNumber(
     (100 * parseFloat(couponLevel)) / parseFloat(denomination)
   );
 };
