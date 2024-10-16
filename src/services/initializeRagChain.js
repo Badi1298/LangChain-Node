@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+const { spawn } = require("child_process");
+const path = require("path");
+
 const { PromptTemplate } = require("@langchain/core/prompts");
 const { MemoryVectorStore } = require("langchain/vectorstores/memory");
 const { OpenAIEmbeddings, ChatOpenAI } = require("@langchain/openai");
@@ -13,8 +16,42 @@ const {
 } = require("@langchain/core/runnables");
 const { formatDocumentsAsString } = require("langchain/util/document");
 
+function extractTablesFromPDF(pdfPath) {
+  return new Promise((resolve, reject) => {
+    // Spawn a child process to run the Python script
+    const pythonProcess = spawn("python3", [
+      path.join(__dirname, "../../scripts/extract_tables.py"),
+      pdfPath,
+    ]);
+
+    // Collect data from Python script
+    let result = "";
+    pythonProcess.stdout.on("data", (data) => {
+      result += data.toString();
+    });
+
+    // Handle errors
+    pythonProcess.stderr.on("data", (data) => {
+      reject(`Error: ${data}`);
+    });
+
+    // Resolve the promise when the script finishes
+    pythonProcess.on("close", (code) => {
+      if (code === 0) {
+        resolve(result);
+      } else {
+        reject(`Python script exited with code ${code}`);
+      }
+    });
+  });
+}
+
 const initializeRagChain = async (pdfPath) => {
   // Get the path of the uploaded PDF file
+
+  const extractedTables = await extractTablesFromPDF(pdfPath);
+
+  console.log(extractedTables);
 
   const loader = new PDFLoader(pdfPath, {
     // you may need to add `.then(m => m.default)` to the end of the import
@@ -25,12 +62,21 @@ const initializeRagChain = async (pdfPath) => {
   // Load and parse the PDF using PDFLoader
   const loadedDocs = await loader.load();
 
+  const combinedExtractedTable = loadedDocs[0].pageContent.concat(
+    "\n",
+    extractedTables
+  );
+
+  loadedDocs[0].pageContent = combinedExtractedTable;
+
   // Split the parsed PDF text into smaller chunks for processing
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 2000, // Each chunk will be 1000 characters long
     chunkOverlap: 400, // Overlap 200 characters between chunks to preserve context
   });
   const allSplits = await splitter.splitDocuments(loadedDocs);
+
+  console.log(allSplits);
 
   // Create an in-memory vector store from the document chunks using embeddings
   const inMemoryVectorStore = await MemoryVectorStore.fromDocuments(
@@ -44,11 +90,11 @@ const initializeRagChain = async (pdfPath) => {
     searchType: "similarity", // Search based on similarity
   });
 
-  const data = await vectorStoreRetriever.invoke(
-    "What is the Initial Fixing Level of the underlyings inside the Underlying table?"
-  );
+  // const data = await vectorStoreRetriever.invoke(
+  //   "What is the Initial Fixing Level of the underlyings inside the Underlying table?"
+  // );
 
-  console.log(data);
+  // console.log(data);
 
   // Set up the language model (ChatGPT) for processing text
   const llm = new ChatOpenAI({
