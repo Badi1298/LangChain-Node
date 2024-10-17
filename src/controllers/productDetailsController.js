@@ -37,7 +37,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
     const pdfPath = path.join(process.cwd(), req.file.path);
 
     // Initialize the Retrieval-Augmented Generation (RAG) chain to process the PDF.
-    const runnableRagChain = await initializeRagChain(pdfPath);
+    const runnableRagChain = await initializeRagChain(pdfPath, true);
 
     const queries = queryMap[issuerId][categoryId]; // Get the queries for issuer 9 and product type 9
 

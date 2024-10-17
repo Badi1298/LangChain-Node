@@ -46,12 +46,13 @@ function extractTablesFromPDF(pdfPath) {
   });
 }
 
-const initializeRagChain = async (pdfPath) => {
-  // Get the path of the uploaded PDF file
+const initializeRagChain = async (pdfPath, parseTables = false) => {
+  let extractedTables = "";
 
-  const extractedTables = await extractTablesFromPDF(pdfPath);
-
-  console.log(extractedTables);
+  if (parseTables) {
+    extractedTables = await extractTablesFromPDF(pdfPath);
+    console.log(extractedTables);
+  }
 
   const loader = new PDFLoader(pdfPath, {
     // you may need to add `.then(m => m.default)` to the end of the import
@@ -59,15 +60,18 @@ const initializeRagChain = async (pdfPath) => {
     splitPages: false,
     parsedItemSeparator: "",
   });
+
   // Load and parse the PDF using PDFLoader
   const loadedDocs = await loader.load();
 
-  const combinedExtractedTable = loadedDocs[0].pageContent.concat(
-    "\n",
-    extractedTables
-  );
+  if (parseTables) {
+    const combinedExtractedTable = loadedDocs[0].pageContent.concat(
+      "\n",
+      extractedTables
+    );
 
-  loadedDocs[0].pageContent = combinedExtractedTable;
+    loadedDocs[0].pageContent = combinedExtractedTable;
+  }
 
   // Split the parsed PDF text into smaller chunks for processing
   const splitter = new RecursiveCharacterTextSplitter({
@@ -75,8 +79,6 @@ const initializeRagChain = async (pdfPath) => {
     chunkOverlap: 400, // Overlap 200 characters between chunks to preserve context
   });
   const allSplits = await splitter.splitDocuments(loadedDocs);
-
-  // console.log(allSplits);
 
   // Create an in-memory vector store from the document chunks using embeddings
   const inMemoryVectorStore = await MemoryVectorStore.fromDocuments(
@@ -91,14 +93,14 @@ const initializeRagChain = async (pdfPath) => {
   });
 
   // const data = await vectorStoreRetriever.invoke(
-  //   "What is the Settlement Type(s) inside the General Information section?"
+  //   "The difference in days between the Initial Fixing Date and the Final Fixing Date. Display only the number, so for example if the difference is 180, just say 180."
   // );
 
   // console.log(data);
 
   // Set up the language model (ChatGPT) for processing text
   const llm = new ChatOpenAI({
-    model: "gpt-4o", // GPT model being used
+    model: "gpt-4o-mini", // GPT model being used
     temperature: 0, // Use deterministic output (low temperature)
   });
 

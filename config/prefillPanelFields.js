@@ -8,13 +8,16 @@ module.exports = {
   MATU: {
     key: "MATU",
     valueKey: "maturity",
-    process: (value) => Math.round(parseInt(value) / 30),
+    process: (value) => Math.round(parseInt(value.replace(/[()]/g, "")) / 30),
   },
   FREQ: {
     key: "FREQ",
     valueKey: "frequency",
     process: (value, ragResults) =>
-      computeFrequency(Math.round(parseInt(ragResults.maturity) / 30), value),
+      computeFrequency(
+        Math.round(parseInt(ragResults.maturity.replace(/[()]/g, "")) / 30),
+        value
+      ),
   },
   CPN_LEVEL_PP: {
     key: "CPN_LEVEL_PP",
@@ -25,6 +28,7 @@ module.exports = {
   K_PROTECT_LEVEL: {
     key: "K_PROTECT_LEVEL",
     valueKey: "capitalProtectionLevel",
+    process: (value) => value.replace(/[()]/g, ""),
   },
   CASH_PHY: {
     key: "CASH_PHY",
