@@ -3,14 +3,11 @@ const { ChatPromptTemplate } = require("@langchain/core/prompts");
 const { StringOutputParser } = require("@langchain/core/output_parsers");
 
 exports.computeStockSuggestions = async (req, res) => {
-	const model = new ChatOpenAI({ model: "gpt-4o" });
+	// return;
 
-	const systemTemplate = "You are a smart AI, with vast knowledge about the financial industry.";
+	const model = new ChatOpenAI({ model: "gpt-4o-mini" });
 
-	const promptTemplate = ChatPromptTemplate.fromMessages([
-		["system", systemTemplate],
-		["user", "{text}"],
-	]);
+	const promptTemplate = ChatPromptTemplate.fromMessages([["user", "{text}"]]);
 
 	const parser = new StringOutputParser();
 
