@@ -13,7 +13,19 @@ exports.computeStockSuggestions = async (req, res) => {
 
 	const llmChain = promptTemplate.pipe(model).pipe(parser);
 
+	const inputTokens = await model.getNumTokens(req.body.text);
+
 	const result = await llmChain.invoke({ text: req.body.text });
 
-	res.json({ success: true, data: result });
+	const outputTokens = await model.getNumTokens(result);
+
+	res.json({
+		success: true,
+		data: result,
+		tokenUsage: {
+			input: inputTokens,
+			output: outputTokens,
+			total: inputTokens + outputTokens,
+		},
+	});
 };
