@@ -1,6 +1,4 @@
 const openai = require("../services/openaiClient.js");
-const decorrelationPrompt = require("../prompts/phoenix-autocall/decorrelationPrompt.js");
-const { productTypePrompts } = require("../prompts/index.js");
 
 /**
  * Generates an explanation for stock decorrelation using an LLM.
