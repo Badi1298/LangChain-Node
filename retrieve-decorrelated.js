@@ -169,3 +169,7 @@ async function retrieveDecorrelatedStocks(
 		return [];
 	}
 }
+
+module.exports = {
+	retrieveDecorrelatedStocks,
+};

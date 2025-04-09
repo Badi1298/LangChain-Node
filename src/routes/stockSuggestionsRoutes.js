@@ -4,8 +4,11 @@ const router = express.Router();
 
 const stockSuggestionsController = require("../controllers/stockSuggestionsController");
 
+const decorrelationProvider = require("../../decorrelated.js");
+const { retrieveDecorrelatedStocks } = require("../../retrieve-decorrelated.js");
+
 router.post("/decorrelated", async (req, res) => {
-	const { selectedStocks } = req.body;
+	const { selectedStocks, query } = req.body;
 
 	if (!selectedStocks || !Array.isArray(selectedStocks) || selectedStocks.length === 0) {
 		return res

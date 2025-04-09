@@ -113,3 +113,5 @@ const decorrelationProvider = {
 		return sectorDecorrelationMap[selectedSector] || [];
 	},
 };
+
+module.exports = decorrelationProvider;
