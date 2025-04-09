@@ -6,10 +6,12 @@ const stockSuggestionsController = require("../controllers/stockSuggestionsContr
 
 const decorrelationProvider = require("../services/decorrelationProvider.js");
 const { retrieveDecorrelatedStocks } = require("../services/stockSuggestionService.js");
-const { generateDecorrelationExplanation } = require("../services/llmService.js");
+const { generateStockSuggestions } = require("../services/llmService.js");
 
 router.post("/decorrelated", async (req, res) => {
-	const { selectedStocks, query } = req.body;
+	const { selectedStocks, productType } = req.body;
+
+	console.log(productType, selectedStocks);
 
 	if (!selectedStocks || !Array.isArray(selectedStocks) || selectedStocks.length === 0) {
 		return res
@@ -26,9 +28,10 @@ router.post("/decorrelated", async (req, res) => {
 			.json({ error: "Pinecone index or vector dimension not initialized." });
 	}
 
+	return;
+
 	try {
 		const retrievalResults = await retrieveDecorrelatedStocks(
-			query || "Decorrelated stock suggestions query", // Use provided query or default
 			selectedStocks, // Pass the array from the request
 			pineconeIndex, // Your initialized Pinecone index
 			vectorDimension, // Vector dimension from app.locals
@@ -42,8 +45,7 @@ router.post("/decorrelated", async (req, res) => {
 			console.log(
 				`[API Route] Generating explanation for ${retrievalResults.length} suggestions...`
 			);
-			explanation = await generateDecorrelationExplanation(
-				query,
+			explanation = await generateStockSuggestions(
 				selectedStocks, // Pass original selected stocks for context
 				retrievalResults // Pass retrieved stocks for explanation
 			);

@@ -1,20 +1,14 @@
 const openai = require("../services/openaiClient.js");
-const config = require("../utils/config.js");
-const decorrelationPrompts = require("../prompts/decorrelationPrompts.js");
+const decorrelationPrompt = require("../prompts/phoenix-autocall/decorrelationPrompt.js");
 
 /**
  * Generates an explanation for stock decorrelation using an LLM.
  *
- * @param {string} originalQuery - The original user query for context.
  * @param {Array<object>} selectedStocksInput - The user's selected stocks (input structure).
  * @param {Array<object>} suggestedStocks - The stocks retrieved from Pinecone.
  * @returns {Promise<string>} - A string containing the LLM-generated explanation.
  */
-async function generateDecorrelationExplanation(
-	originalQuery,
-	selectedStocksInput,
-	suggestedStocks
-) {
+async function generateStockSuggestions(selectedStocksInput, suggestedStocks) {
 	if (
 		!selectedStocksInput ||
 		selectedStocksInput.length === 0 ||
@@ -31,12 +25,10 @@ async function generateDecorrelationExplanation(
 
 	// Format suggested stocks concisely
 	const suggestionsInfo = suggestedStocks
-		.map((stock) => `- ${stock.name} (Sector: ${stock.sector})`)
+		.map((stock) => `- ${stock.name} (Sector: ${stock.sector}, Industry: ${stock.sub_sector})`)
 		.join("\n");
 
 	// --- 2. Construct Prompt ---
-	const systemPrompt = decorrelationPrompts.systemPrompt;
-	const userPrompt = decorrelationPrompts.user({ selectedInfo, suggestionsInfo, referenceStock });
 
 	// --- 3. Call OpenAI API ---
 	try {
@@ -71,5 +63,5 @@ async function generateDecorrelationExplanation(
 }
 
 module.exports = {
-	generateDecorrelationExplanation,
+	generateStockSuggestions,
 };

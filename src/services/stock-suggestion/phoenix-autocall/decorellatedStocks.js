@@ -3,7 +3,6 @@
  * and a specific volatility range relative to selected stocks.
  * ADJUSTED for specific input structure and final sector list.
  *
- * @param {string} query - The user's natural language query (used for context).
  * @param {Array<object>} selectedStocksInput - Array of currently selected stock objects FROM API/FE.
  * Expected structure: { id (number), country (string), sector (string), volatility_6 (number), ... }.
  * @param {Pinecone.Index} pineconeIndex - Initialized Pinecone index object.
@@ -11,14 +10,13 @@
  * @param {number} [topK=10] - The maximum number of results to retrieve.
  * @returns {Promise<Array<object>>} - Promise resolving to an array of retrieved stock metadata objects including their IDs.
  */
-async function retrieveDecorrelatedStocks(
-	query,
+async function retrieveDecorrelatedStocks({
 	selectedStocksInput, // Input array with structure { id, country, sector, volatility_6, ... }
 	pineconeIndex,
 	vectorDimension, // Assuming this is passed in or available in the context
 	decorrelationProvider,
-	topK = 10
-) {
+	topK = 10,
+}) {
 	if (!selectedStocksInput || selectedStocksInput.length === 0) {
 		console.error("Retrieval Error: No selected stocks provided for context.");
 		return [];
@@ -170,6 +168,4 @@ async function retrieveDecorrelatedStocks(
 	}
 }
 
-module.exports = {
-	retrieveDecorrelatedStocks,
-};
+module.exports = retrieveDecorrelatedStocks;
