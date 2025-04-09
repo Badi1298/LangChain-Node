@@ -4,8 +4,8 @@ const router = express.Router();
 
 const stockSuggestionsController = require("../controllers/stockSuggestionsController");
 
-const decorrelationProvider = require("../../decorrelated.js");
-const { retrieveDecorrelatedStocks } = require("../../retrieve-decorrelated.js");
+const decorrelationProvider = require("../services/decorrelationProvider.js");
+const { retrieveDecorrelatedStocks } = require("../services/stockSuggestionService.js");
 const { generateDecorrelationExplanation } = require("../services/llmService.js");
 
 router.post("/decorrelated", async (req, res) => {
