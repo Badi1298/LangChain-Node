@@ -1,11 +1,11 @@
-// services/pineconeClient.js
 const { Pinecone } = require("@pinecone-database/pinecone");
-const { config } = require("../utils/config.js");
+const config = require("../utils/config.js");
 
 let pineconeIndexInstance = null;
 
 try {
 	console.log("Initializing Pinecone client...");
+
 	const pc = new Pinecone({ apiKey: config.pinecone.apiKey });
 
 	console.log(`Accessing Pinecone index: ${config.pinecone.indexName}`);
@@ -22,4 +22,4 @@ try {
 }
 
 // Export the single, initialized index instance
-export const pineconeIndex = pineconeIndexInstance;
+module.exports = pineconeIndexInstance;
