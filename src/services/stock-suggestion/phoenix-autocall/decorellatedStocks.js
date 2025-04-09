@@ -3,7 +3,7 @@
  * and a specific volatility range relative to selected stocks.
  * ADJUSTED for specific input structure and final sector list.
  *
- * @param {Array<object>} selectedStocksInput - Array of currently selected stock objects FROM API/FE.
+ * @param {Array<object>} selectedStocks - Array of currently selected stock objects FROM API/FE.
  * Expected structure: { id (number), country (string), sector (string), volatility_6 (number), ... }.
  * @param {Pinecone.Index} pineconeIndex - Initialized Pinecone index object.
  * @param {object} decorrelationProvider - Object with method getDecorrelatedSectors(sector).
@@ -11,13 +11,13 @@
  * @returns {Promise<Array<object>>} - Promise resolving to an array of retrieved stock metadata objects including their IDs.
  */
 async function retrieveDecorrelatedStocks({
-	selectedStocksInput, // Input array with structure { id, country, sector, volatility_6, ... }
+	selectedStocks, // Input array with structure { id, country, sector, volatility_6, ... }
 	pineconeIndex,
 	vectorDimension, // Assuming this is passed in or available in the context
 	decorrelationProvider,
 	topK = 10,
 }) {
-	if (!selectedStocksInput || selectedStocksInput.length === 0) {
+	if (!selectedStocks || selectedStocks.length === 0) {
 		console.error("Retrieval Error: No selected stocks provided for context.");
 		return [];
 	}
@@ -26,12 +26,12 @@ async function retrieveDecorrelatedStocks({
 		return [];
 	}
 
-	// --- 1. Parse Context from selectedStocksInput ---
-	const referenceStock = selectedStocksInput[0]; // Use first stock for context
+	// --- 1. Parse Context from selectedStocks ---
+	const referenceStock = selectedStocks[0]; // Use first stock for context
 	const referenceCountry = referenceStock?.country;
 	const referenceSector = referenceStock?.sector;
 	// Ensure IDs are strings for comparison with Pinecone string IDs later
-	const selectedStockIDs = selectedStocksInput.map((s) => String(s.id));
+	const selectedStockIDs = selectedStocks.map((s) => String(s.id));
 
 	if (!referenceCountry || !referenceSector) {
 		console.error(
@@ -53,7 +53,7 @@ async function retrieveDecorrelatedStocks({
 	let minVolatility = Infinity;
 	let maxVolatility = -Infinity;
 	let validVolatilityCount = 0;
-	selectedStocksInput.forEach((stock) => {
+	selectedStocks.forEach((stock) => {
 		const volatility = stock?.volatility_6;
 		if (volatility) {
 			minVolatility = Math.min(minVolatility, parseFloat(volatility));
@@ -129,7 +129,7 @@ async function retrieveDecorrelatedStocks({
 	);
 	try {
 		const zeroVector = new Array(vectorDimension).fill(0);
-		const initialTopK = topK + selectedStocksInput.length; // Fetch more for post-filtering
+		const initialTopK = topK + selectedStocks.length; // Fetch more for post-filtering
 
 		const queryResponse = await pineconeIndex.query({
 			vector: zeroVector,
@@ -168,4 +168,4 @@ async function retrieveDecorrelatedStocks({
 	}
 }
 
-module.exports = retrieveDecorrelatedStocks;
+module.exports = { retrieveDecorrelatedStocks };

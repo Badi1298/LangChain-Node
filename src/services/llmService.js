@@ -18,6 +18,9 @@ async function generateStockSuggestions(selectedStocksInput, suggestedStocks) {
 		return "Could not generate explanation: Missing input data.";
 	}
 
+	console.log("reachedLLMService");
+	return;
+
 	// --- 1. Prepare Context for Prompt ---
 	// Use the first selected stock for primary context
 	const referenceStock = selectedStocksInput[0];

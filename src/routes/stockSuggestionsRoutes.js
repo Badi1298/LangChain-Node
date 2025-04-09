@@ -5,13 +5,12 @@ const router = express.Router();
 const stockSuggestionsController = require("../controllers/stockSuggestionsController");
 
 const decorrelationProvider = require("../services/decorrelationProvider.js");
-const { retrieveDecorrelatedStocks } = require("../services/stockSuggestionService.js");
 const { generateStockSuggestions } = require("../services/llmService.js");
+
+const { stockSuggestionFunctions } = require("../services/stock-suggestion/index.js");
 
 router.post("/decorrelated", async (req, res) => {
 	const { selectedStocks, productType } = req.body;
-
-	console.log(productType, selectedStocks);
 
 	if (!selectedStocks || !Array.isArray(selectedStocks) || selectedStocks.length === 0) {
 		return res
@@ -28,40 +27,45 @@ router.post("/decorrelated", async (req, res) => {
 			.json({ error: "Pinecone index or vector dimension not initialized." });
 	}
 
-	return;
+	Object.values(stockSuggestionFunctions[productType]).forEach(async (suggestionFunction) => {
+		try {
+			const retrievalResults = await suggestionFunction({
+				selectedStocks,
+				pineconeIndex,
+				vectorDimension,
+				decorrelationProvider,
+				topK: 50,
+			});
 
-	try {
-		const retrievalResults = await retrieveDecorrelatedStocks(
-			selectedStocks, // Pass the array from the request
-			pineconeIndex, // Your initialized Pinecone index
-			vectorDimension, // Vector dimension from app.locals
-			decorrelationProvider,
-			50 // Desired number of suggestions (topK)
-		);
+			console.log(retrievalResults);
 
-		// --- Step 2: Generate Explanation (if stocks found) ---
-		let explanation = "No suitable decorrelated stocks found matching the criteria.";
-		if (retrievalResults.length > 0) {
-			console.log(
-				`[API Route] Generating explanation for ${retrievalResults.length} suggestions...`
-			);
-			explanation = await generateStockSuggestions(
-				selectedStocks, // Pass original selected stocks for context
-				retrievalResults // Pass retrieved stocks for explanation
-			);
-		} else {
-			console.log("[API Route] No retrieval results, skipping LLM explanation.");
+			// --- Step 2: Generate Explanation (if stocks found) ---
+			let explanation = "No suitable decorrelated stocks found matching the criteria.";
+			if (retrievalResults.length > 0) {
+				console.log(
+					`[API Route] Generating explanation for ${retrievalResults.length} suggestions...`
+				);
+				console.log("llmservice");
+				explanation = await generateStockSuggestions(
+					selectedStocks, // Pass original selected stocks for context
+					retrievalResults // Pass retrieved stocks for explanation
+				);
+			} else {
+				console.log("[API Route] No retrieval results, skipping LLM explanation.");
+			}
+
+			// --- Step 3: Send Response ---
+			res.json({
+				suggestions: retrievalResults, // Array of suggested stock metadata
+				explanation: explanation, // LLM-generated explanation string or default message
+			});
+		} catch (error) {
+			console.error("Error in /suggest/decorrelated route:", error);
+			res.status(500).json({
+				error: "Internal server error during suggestion retrieval.",
+			});
 		}
-
-		// --- Step 3: Send Response ---
-		res.json({
-			suggestions: retrievalResults, // Array of suggested stock metadata
-			explanation: explanation, // LLM-generated explanation string or default message
-		});
-	} catch (error) {
-		console.error("Error in /suggest/decorrelated route:", error);
-		res.status(500).json({ error: "Internal server error during suggestion retrieval." });
-	}
+	});
 });
 router.post("/compute-stock-suggestions", stockSuggestionsController.computeStockSuggestions);
 
