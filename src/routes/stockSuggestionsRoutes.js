@@ -7,7 +7,7 @@ const stockSuggestionsController = require("../controllers/stockSuggestionsContr
 const decorrelationProvider = require("../services/decorrelationProvider.js");
 const { generateStockSuggestions } = require("../services/llmService.js");
 
-const { stockSuggestionFunctions } = require("../services/stock-suggestion/index.js");
+const { stockSuggestionFields } = require("../services/stock-suggestion/index.js");
 
 router.post("/decorrelated", async (req, res) => {
 	const { selectedStocks, productType } = req.body;
@@ -27,9 +27,22 @@ router.post("/decorrelated", async (req, res) => {
 			.json({ error: "Pinecone index or vector dimension not initialized." });
 	}
 
-	Object.values(stockSuggestionFunctions[productType]).forEach(async (suggestionFunction) => {
+	Object.values(stockSuggestionFields[productType]).forEach(async (productTypeFields) => {
+		const { retriever, systemPrompt, userPrompt } = productTypeFields;
+
+		if (!retriever) {
+			return res.status(400).json({ error: "Invalid product type or retriever not found." });
+		}
+
+		if (!systemPrompt || !userPrompt) {
+			return res.status(400).json({
+				error: "Missing system or user prompt for LLM generation.",
+			});
+		}
+
+		// --- Step 1: Retrieve Stocks ---
 		try {
-			const retrievalResults = await suggestionFunction({
+			const retrievalResults = await productTypeFields.retriever({
 				selectedStocks,
 				pineconeIndex,
 				vectorDimension,
@@ -37,19 +50,20 @@ router.post("/decorrelated", async (req, res) => {
 				topK: 50,
 			});
 
-			console.log(retrievalResults);
-
 			// --- Step 2: Generate Explanation (if stocks found) ---
 			let explanation = "No suitable decorrelated stocks found matching the criteria.";
 			if (retrievalResults.length > 0) {
 				console.log(
 					`[API Route] Generating explanation for ${retrievalResults.length} suggestions...`
 				);
-				console.log("llmservice");
-				explanation = await generateStockSuggestions(
-					selectedStocks, // Pass original selected stocks for context
-					retrievalResults // Pass retrieved stocks for explanation
-				);
+
+				// Generate explanation using LLM
+				explanation = await generateStockSuggestions({
+					selectedStocks,
+					retrievalResults,
+					systemPrompt,
+					userPrompt,
+				});
 			} else {
 				console.log("[API Route] No retrieval results, skipping LLM explanation.");
 			}

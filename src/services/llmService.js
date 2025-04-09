@@ -1,37 +1,39 @@
 const openai = require("../services/openaiClient.js");
 const decorrelationPrompt = require("../prompts/phoenix-autocall/decorrelationPrompt.js");
+const { productTypePrompts } = require("../prompts/index.js");
 
 /**
  * Generates an explanation for stock decorrelation using an LLM.
  *
- * @param {Array<object>} selectedStocksInput - The user's selected stocks (input structure).
- * @param {Array<object>} suggestedStocks - The stocks retrieved from Pinecone.
+ * @param {Array<object>} selectedStocks - The user's selected stocks (input structure).
+ * @param {Array<object>} retrievalResults - The stocks retrieved from Pinecone.
  * @returns {Promise<string>} - A string containing the LLM-generated explanation.
  */
-async function generateStockSuggestions(selectedStocksInput, suggestedStocks) {
+async function generateStockSuggestions({
+	selectedStocks,
+	retrievalResults,
+	systemPrompt,
+	userPrompt,
+}) {
 	if (
-		!selectedStocksInput ||
-		selectedStocksInput.length === 0 ||
-		!suggestedStocks ||
-		suggestedStocks.length === 0
+		!selectedStocks ||
+		selectedStocks.length === 0 ||
+		!retrievalResults ||
+		retrievalResults.length === 0
 	) {
-		return "Could not generate explanation: Missing input data.";
+		console.error("[LLM Service] Error: Missing input data for LLM generation.");
+		return;
 	}
-
-	console.log("reachedLLMService");
-	return;
 
 	// --- 1. Prepare Context for Prompt ---
 	// Use the first selected stock for primary context
-	const referenceStock = selectedStocksInput[0];
+	const referenceStock = selectedStocks[0];
 	const selectedInfo = `${referenceStock.name} (Sector: ${referenceStock.sector})`;
 
 	// Format suggested stocks concisely
-	const suggestionsInfo = suggestedStocks
+	const suggestionsInfo = retrievalResults
 		.map((stock) => `- ${stock.name} (Sector: ${stock.sector}, Industry: ${stock.sub_sector})`)
 		.join("\n");
-
-	// --- 2. Construct Prompt ---
 
 	// --- 3. Call OpenAI API ---
 	try {
@@ -42,7 +44,10 @@ async function generateStockSuggestions(selectedStocksInput, suggestedStocks) {
 			model: chatModel, // Use the specified chat model
 			messages: [
 				{ role: "system", content: systemPrompt },
-				{ role: "user", content: userPrompt },
+				{
+					role: "user",
+					content: userPrompt({ selectedInfo, suggestionsInfo, referenceStock }),
+				},
 			],
 			temperature: 0.5, // Adjust for desired creativity/factuality balance
 			max_tokens: 500, // Adjust based on expected length (e.g., 10 stocks * 2 lines * ~20 tokens/line)
