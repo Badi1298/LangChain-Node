@@ -6,6 +6,7 @@ const stockSuggestionsController = require("../controllers/stockSuggestionsContr
 
 const decorrelationProvider = require("../../decorrelated.js");
 const { retrieveDecorrelatedStocks } = require("../../retrieve-decorrelated.js");
+const { generateDecorrelationExplanation } = require("../services/llmService.js");
 
 router.post("/decorrelated", async (req, res) => {
 	const { selectedStocks, query } = req.body;
@@ -26,27 +27,35 @@ router.post("/decorrelated", async (req, res) => {
 	}
 
 	try {
-		const results = await retrieveDecorrelatedStocks(
+		const retrievalResults = await retrieveDecorrelatedStocks(
 			query || "Decorrelated stock suggestions query", // Use provided query or default
 			selectedStocks, // Pass the array from the request
 			pineconeIndex, // Your initialized Pinecone index
 			vectorDimension, // Vector dimension from app.locals
 			decorrelationProvider,
-			30 // Desired number of suggestions (topK)
+			50 // Desired number of suggestions (topK)
 		);
 
-		// **NEXT STEP**: If results are found, pass them to the LLM for explanation
-		if (results.length > 0) {
-			// Placeholder for LLM call
-			// const explanation = await generateDecorrelationExplanation(query, selectedStocks, results);
-			// res.json({ suggestions: results, explanation: explanation });
-			res.json({ suggestions: results, explanation: "LLM explanation generation needed." }); // Send results back for now
+		// --- Step 2: Generate Explanation (if stocks found) ---
+		let explanation = "No suitable decorrelated stocks found matching the criteria.";
+		if (retrievalResults.length > 0) {
+			console.log(
+				`[API Route] Generating explanation for ${retrievalResults.length} suggestions...`
+			);
+			explanation = await generateDecorrelationExplanation(
+				query,
+				selectedStocks, // Pass original selected stocks for context
+				retrievalResults // Pass retrieved stocks for explanation
+			);
 		} else {
-			res.json({
-				suggestions: [],
-				explanation: "No suitable decorrelated stocks found matching the criteria.",
-			});
+			console.log("[API Route] No retrieval results, skipping LLM explanation.");
 		}
+
+		// --- Step 3: Send Response ---
+		res.json({
+			suggestions: retrievalResults, // Array of suggested stock metadata
+			explanation: explanation, // LLM-generated explanation string or default message
+		});
 	} catch (error) {
 		console.error("Error in /suggest/decorrelated route:", error);
 		res.status(500).json({ error: "Internal server error during suggestion retrieval." });
