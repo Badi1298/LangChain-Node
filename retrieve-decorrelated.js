@@ -56,10 +56,10 @@ async function retrieveDecorrelatedStocks(
 	let maxVolatility = -Infinity;
 	let validVolatilityCount = 0;
 	selectedStocksInput.forEach((stock) => {
-		const volatility = stock?.volatility_6; // <--- Use volatility_6 from INPUT object
-		if (typeof volatility === "number" && !isNaN(volatility)) {
-			minVolatility = Math.min(minVolatility, volatility);
-			maxVolatility = Math.max(maxVolatility, volatility);
+		const volatility = stock?.volatility_6;
+		if (volatility) {
+			minVolatility = Math.min(minVolatility, parseFloat(volatility));
+			maxVolatility = Math.max(maxVolatility, parseFloat(volatility));
 			validVolatilityCount++;
 		} else {
 			console.warn(

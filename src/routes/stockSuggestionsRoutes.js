@@ -32,7 +32,7 @@ router.post("/decorrelated", async (req, res) => {
 			pineconeIndex, // Your initialized Pinecone index
 			vectorDimension, // Vector dimension from app.locals
 			decorrelationProvider,
-			10 // Desired number of suggestions (topK)
+			30 // Desired number of suggestions (topK)
 		);
 
 		// **NEXT STEP**: If results are found, pass them to the LLM for explanation
