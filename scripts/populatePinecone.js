@@ -53,10 +53,12 @@ async function runIndexer() {
 		// --- Delete Index if it exists ---
 		console.log(`Checking if index '${INDEX_NAME}' exists...`);
 		const existingIndexes = await pinecone.listIndexes();
-		if (existingIndexes.includes(INDEX_NAME)) {
+		if (existingIndexes.indexes?.some((index) => index.name === INDEX_NAME)) {
 			console.log(`Index '${INDEX_NAME}' exists. Deleting...`);
 			await pinecone.deleteIndex(INDEX_NAME);
 		}
+		console.log(`Index '${INDEX_NAME}' deleted. Waiting for creation...`);
+		await new Promise((resolve) => setTimeout(resolve, 30000)); // Delay
 
 		console.log(`Creating index '${INDEX_NAME}' with dimension ${VECTOR_DIMENSION}...`);
 		await pinecone.createIndex({
