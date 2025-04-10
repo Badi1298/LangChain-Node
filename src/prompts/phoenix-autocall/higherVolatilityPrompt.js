@@ -14,7 +14,7 @@ const userPromptTemplate = ({ selectedInfo, suggestionsInfo, referenceStock }) =
         Provide a brief explanation (1-2 sentences maximum per stock) suggesting potential reasons why this stock's current volatility is in the lower part of its recent historical (52-week) range, despite being in a similar business area as the selected stock (${referenceStock.name}).
         Focus on potential company-specific factors, recent stabilization after prior events, market positioning, or lack of recent impactful news that might explain the lower current volatility relative to its own history.
         Do not give investment advice. Present the explanations clearly for each suggested stock.
-        Example structure for one stock:
+        Example structure for one stock, in markdown format:
         "[Suggested Stock Name]: Its currently lower relative volatility might stem from [brief potential reason, e.g., a period of consolidation after recent earnings, less exposure to current specific sub-sector news, successful debt restructuring calming markets, etc.]."
     `;
 };
