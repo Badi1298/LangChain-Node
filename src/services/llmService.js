@@ -28,6 +28,9 @@ async function generateStockSuggestions({
 	const referenceStock = selectedStocks[0];
 	const stocksName = selectedStocks.map((stock) => stock.name).join(", ");
 	const stocksSector = [...new Set(selectedStocks.map((stock) => stock.sector))].join(", ");
+	const stocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))].join(
+		", "
+	);
 
 	const selectedInfo = `Stocks Name: ${stocksName} (Sectors: ${stocksSector})`;
 
@@ -47,7 +50,13 @@ async function generateStockSuggestions({
 				{ role: "system", content: systemPrompt },
 				{
 					role: "user",
-					content: userPrompt({ selectedInfo, suggestionsInfo, stocksSector }),
+					content: userPrompt({
+						selectedInfo,
+						suggestionsInfo,
+						stocksName,
+						stocksSector,
+						stocksSubSectors,
+					}),
 				},
 			],
 			temperature: 0.5, // Adjust for desired creativity/factuality balance

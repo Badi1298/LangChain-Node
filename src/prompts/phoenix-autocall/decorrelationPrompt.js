@@ -13,7 +13,9 @@ const userPromptTemplate = ({ selectedInfo, suggestionsInfo, stocksSector }) => 
         Focus specifically on how their business models might cause them to react differently to common macroeconomic events (e.g., changes in interest rates, inflation, economic growth phases, commodity prices, etc.).
         Do not give investment advice. Present the explanations clearly for each suggested stock.
         Example structure for one stock, respond in markdown format:
-        "[Suggested Stock Name]: Its [Sector Name] sector often reacts differently to [Macro Event] because [brief reason]."
+        "**[Suggested Stock Name]**: Its **[Sector Name]** sector often reacts differently to **[Macro Event]** because [brief reason]."
+
+        **Important:** Note how '[Suggested Stock Name]', '[Sector Name]' and '[Macro Event]' are bold in the example. Ensure that all are also formatted in **bold** using Markdown.
     `;
 };
 
