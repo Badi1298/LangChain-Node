@@ -91,8 +91,8 @@ router.post("/decorrelated", async (req, res) => {
 			// the object and collect results after Promise.all resolves. Pushing
 			// works fine as long as errors are handled correctly.
 			responseJson.push({
-				explanation,
 				sectionTitle,
+				explanation,
 			});
 		} catch (error) {
 			// Log the specific error for this iteration
