@@ -29,25 +29,23 @@ async function retrieveDecorrelatedStocks({
 	// --- 1. Parse Context from selectedStocks ---
 	const referenceStock = selectedStocks[0]; // Use first stock for context
 	const referenceCountry = referenceStock?.country;
-	const referenceSector = referenceStock?.sector;
+	const referenceSectors = [...new Set(selectedStocks.map((s) => s.sector))];
 	// Ensure IDs are strings for comparison with Pinecone string IDs later
 	const selectedStockIDs = selectedStocks.map((s) => String(s.id));
 
-	if (!referenceCountry || !referenceSector) {
+	if (!referenceCountry || referenceSectors.length === 0) {
 		console.error(
 			"[Retrieval] Error: Selected stock(s) missing 'country' or 'sector'. Received:",
 			referenceStock
 		);
 		return [];
 	}
-	// Validate if the sector exists in our known map keys
-	if (!decorrelationProvider.getDecorrelatedSectors(referenceSector)) {
-		console.warn(
-			`[Retrieval] Warning: Sector '${referenceSector}' from selected stock is not found in the decorrelation map.`
-		);
-		// Depending on requirements, you might want to return [] or proceed differently.
-	}
-	console.log(`[Retrieval] Context: Country='${referenceCountry}', Sector='${referenceSector}'`);
+
+	console.log(
+		`[Retrieval] Context: Country='${referenceCountry}', Sector='${referenceSectors.join(
+			", "
+		)}'`
+	);
 
 	// Calculate volatility range using 'volatility_6' from the INPUT data
 	let minVolatility = Infinity;
@@ -91,19 +89,7 @@ async function retrieveDecorrelatedStocks({
 		)}, ${volatilityUpperBound.toFixed(4)}]`
 	);
 
-	// --- 2. Determine Decorrelated Sectors ---
-	const targetSectors = decorrelationProvider.getDecorrelatedSectors(referenceSector);
-	if (!targetSectors || targetSectors.length === 0) {
-		console.warn(
-			`[Retrieval] No decorrelated sectors defined for '${referenceSector}'. Cannot proceed.`
-		);
-		return []; // Stop if no target sectors are found based on the map
-	}
-	console.log(`[Retrieval] Target Decorrelated Sectors: ${targetSectors.join(", ")}`);
-
-	// --- 3. Construct Pinecone Filter ---
-	// **ASSUMPTION**: Filtering Pinecone based on the 'implied_volatility_12m' metadata field (indexed previously).
-	// Change this key if you indexed a different volatility metric (e.g., 'volatility_6m_indexed').
+	// --- 2. Construct Pinecone Filter ---
 	const pineconeVolatilityFilterKey = "implied_volatility_12m";
 	console.log(
 		`[Retrieval] Filtering Pinecone metadata field: '${pineconeVolatilityFilterKey}' using calculated range.`
@@ -112,7 +98,7 @@ async function retrieveDecorrelatedStocks({
 	const filterCriteriaForPinecone = {
 		$and: [
 			{ country: { $eq: referenceCountry } },
-			{ sector: { $in: targetSectors } },
+			{ sector: { $nin: referenceSectors } },
 			{
 				[pineconeVolatilityFilterKey]: {
 					$gte: volatilityLowerBound,
