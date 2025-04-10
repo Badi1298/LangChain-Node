@@ -1,4 +1,3 @@
-const { ProductTypesId } = require("../config/constants.js");
 const {
 	systemPrompt: decorrelationSystem,
 	user: decorrelationUser,
@@ -8,19 +7,4 @@ const {
 	user: volatilityUser,
 } = require("./phoenix-autocall/higherVolatilityPrompt.js");
 
-const productTypePrompts = {
-	[ProductTypesId.PHOENIX_AUTOCALL]: {
-		improvedDecorrelation: {
-			systemPrompt: decorrelationSystem,
-			userPrompt: decorrelationUser,
-		},
-		higherVolatility: {
-			systemPrompt: volatilitySystem,
-			userPrompt: volatilityUser,
-		},
-	},
-};
-
-module.exports = {
-	productTypePrompts,
-};
+module.exports = { decorrelationSystem, decorrelationUser, volatilitySystem, volatilityUser };

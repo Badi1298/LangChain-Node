@@ -4,7 +4,6 @@ const router = express.Router();
 
 const stockSuggestionsController = require("../controllers/stockSuggestionsController");
 
-const decorrelationProvider = require("../services/decorrelationProvider.js");
 const { generateStockSuggestions } = require("../services/llmService.js");
 
 const { stockSuggestionFields } = require("../services/stock-suggestion/index.js");
@@ -59,7 +58,6 @@ router.post("/stock-suggestions", async (req, res) => {
 				selectedStocks,
 				pineconeIndex,
 				vectorDimension,
-				decorrelationProvider,
 				topK: 50,
 			});
 
