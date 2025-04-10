@@ -113,7 +113,7 @@ async function retrieveDecorrelatedStocks({
 	);
 	try {
 		const zeroVector = new Array(vectorDimension).fill(0);
-		const initialTopK = topK + selectedStocks.length; // Fetch more for post-filtering
+		const initialTopK = topK * 5 + selectedStocks.length; // Fetch more for post-filtering
 
 		const queryResponse = await pineconeIndex.query({
 			vector: zeroVector,
