@@ -9,7 +9,7 @@ const { generateStockSuggestions } = require("../services/llmService.js");
 
 const { stockSuggestionFields } = require("../services/stock-suggestion/index.js");
 
-router.post("/decorrelated", async (req, res) => {
+router.post("/stock-suggestions", async (req, res) => {
 	const { selectedStocks, productType } = req.body;
 
 	if (!selectedStocks || !Array.isArray(selectedStocks) || selectedStocks.length === 0) {
@@ -26,9 +26,6 @@ router.post("/decorrelated", async (req, res) => {
 			.status(500)
 			.json({ error: "Pinecone index or vector dimension not initialized." });
 	}
-
-	// Assuming this code is inside an async function (e.g., an Express route handler)
-	// async (req, res) => { ... }
 
 	const responseJson = [];
 	const productTypeValues = Object.values(stockSuggestionFields[productType]);
