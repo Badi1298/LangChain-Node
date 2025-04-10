@@ -15,6 +15,7 @@ const stockSuggestionFields = {
 			retriever: retrieveDecorrelatedStocks,
 			systemPrompt: decorrelationSystem,
 			userPrompt: decorrelationUser,
+			sectionTitle: "Same country, improved decorrelation/volatility",
 		},
 	],
 };
