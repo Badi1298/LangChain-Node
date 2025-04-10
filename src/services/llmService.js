@@ -26,7 +26,10 @@ async function generateStockSuggestions({
 	// --- 1. Prepare Context for Prompt ---
 	// Use the first selected stock for primary context
 	const referenceStock = selectedStocks[0];
-	const selectedInfo = `${referenceStock.name} (Sector: ${referenceStock.sector})`;
+	const stocksName = selectedStocks.map((stock) => stock.name).join(", ");
+	const stocksSector = [...new Set(selectedStocks.map((stock) => stock.sector))].join(", ");
+
+	const selectedInfo = `Stocks Name: ${stocksName} (Sectors: ${stocksSector})`;
 
 	// Format suggested stocks concisely
 	const suggestionsInfo = retrievalResults
@@ -44,7 +47,7 @@ async function generateStockSuggestions({
 				{ role: "system", content: systemPrompt },
 				{
 					role: "user",
-					content: userPrompt({ selectedInfo, suggestionsInfo, referenceStock }),
+					content: userPrompt({ selectedInfo, suggestionsInfo, stocksSector }),
 				},
 			],
 			temperature: 0.5, // Adjust for desired creativity/factuality balance
