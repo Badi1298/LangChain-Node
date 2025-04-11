@@ -3,7 +3,6 @@ const { GoogleGenAI } = require("@google/genai");
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 async function geminiSuggestions({ selectedStocks, retrievalResults, userPrompt }) {
-	console.log(selectedStocks, retrievalResults, userPrompt);
 	if (
 		!selectedStocks ||
 		selectedStocks.length === 0 ||
