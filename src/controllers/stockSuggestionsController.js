@@ -19,7 +19,19 @@ exports.computeStockSuggestions = async (req, res) => {
 	}
 
 	const responseJson = [];
-	const productTypeValues = Object.values(stockSuggestionFields[productType].sameSubSectors);
+
+	const uniqueStocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))];
+	let productTypeValues = {};
+
+	if (productType === 2) {
+		if (uniqueStocksSubSectors.length === 1) {
+			productTypeValues = Object.values(stockSuggestionFields[productType].sameSubSectors);
+		} else {
+			productTypeValues = Object.values(
+				stockSuggestionFields[productType].differentSubSectors
+			);
+		}
+	}
 
 	// Create an array of promises using map
 	const promises = productTypeValues.map(async (productTypeFields) => {
