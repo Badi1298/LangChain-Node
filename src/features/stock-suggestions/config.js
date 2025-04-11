@@ -30,6 +30,13 @@ const stockSuggestionConfigs = {
 				userPrompt: phoenixAutocallPrompts.volatility.user,
 				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.LOW_VOLATILITY,
 			},
+			{
+				retriever: phoenixAutocallRetrievers.decorrelationToo,
+				llmService: llms.openAiSuggestions,
+				systemPrompt: phoenixAutocallPrompts.decorrelationToo.system,
+				userPrompt: phoenixAutocallPrompts.decorrelationToo.user,
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DECORRELATION_TOO,
+			},
 		],
 		selector: selectors.phoenixAutocallSelector,
 	},

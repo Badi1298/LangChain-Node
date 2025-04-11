@@ -28,6 +28,7 @@ const ProductTypesSuggestionsMap = Object.freeze({
 		DIFFERENT_SUB_SECTORS: "differentSubSectors",
 		IMPROVE_LEVEL: "Optimal suggestions to improve Level",
 		DECORRELATION: "Same country, improved decorrelation/volatility",
+		DECORRELATION_TOO: "Improve levels through decorrelation",
 		LOW_VOLATILITY: "Similar underlyings with volatility lower than usual",
 	},
 });

@@ -10,7 +10,7 @@ const { getDecorrelatedSectors } = require("../../utils/getDecorrelatedSectors.j
  * @param {number} [topK=10] - The maximum number of results to retrieve.
  * @returns {Promise<Array<object>>} - Promise resolving to an array of retrieved stock metadata objects including their IDs.
  */
-async function retrieveDecorrelatedStocks({
+async function retrieveDecorrelatedStocksToo({
 	selectedStocks, // Input array with structure { id, country, sector, volatility_6, ... }
 	pineconeIndex,
 	vectorDimension, // Assuming this is passed in or available in the context
@@ -69,9 +69,8 @@ async function retrieveDecorrelatedStocks({
 		return [];
 	}
 
-	// Calculate target range based on the query logic (XX = min+4, YY = max+10)
-	let volatilityLowerBound = minVolatility + 4;
-	let volatilityUpperBound = maxVolatility + 10;
+	let volatilityLowerBound = minVolatility - 2;
+	let volatilityUpperBound = maxVolatility + 5;
 	if (volatilityLowerBound > volatilityUpperBound) {
 		// Clamp if inverted
 		console.warn(
@@ -145,4 +144,4 @@ async function retrieveDecorrelatedStocks({
 	}
 }
 
-module.exports = { retrieveDecorrelatedStocks };
+module.exports = { retrieveDecorrelatedStocksToo };

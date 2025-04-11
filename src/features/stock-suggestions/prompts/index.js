@@ -7,6 +7,10 @@ const {
 	user: volatilityUser,
 } = require("./phoenix-autocall/higherVolatilityPrompt.js");
 const { user: similarVolatilityUser } = require("./phoenix-autocall/similarVolatilityPrompt.js");
+const {
+	systemPrompt: decorrelationTooSystem,
+	user: decorrelationTooUser,
+} = require("./phoenix-autocall/decorrelationTooPrompt.js");
 
 module.exports = {
 	phoenixAutocallPrompts: {
@@ -16,6 +20,10 @@ module.exports = {
 		decorrelation: {
 			system: decorrelationSystem,
 			user: decorrelationUser,
+		},
+		decorrelationToo: {
+			system: decorrelationTooSystem,
+			user: decorrelationTooUser,
 		},
 		volatility: {
 			system: volatilitySystem,
