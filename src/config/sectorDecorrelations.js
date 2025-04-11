@@ -17,8 +17,4 @@ const sectorDecorrelationMap = {
 	Utilities: ["Information Technology", "Energy", "Materials", "Industrials", "Consumer Discretionary"], // Cyclicals/Commodity (less interest-rate sensitive)
 };
 
-// Example Usage:
-// console.log(sectorDecorrelations["Information Technology"]);
-// Output might be: ["Utilities", "Consumer Staples", "Energy", "Materials", "Real Estate"]
-
 module.exports = { sectorDecorrelationMap };
