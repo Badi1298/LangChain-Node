@@ -28,9 +28,6 @@ exports.computeStockSuggestions = async (req, res) => {
 		});
 	}
 
-	console.log(productTypeValues);
-	return;
-
 	// Create an array of promises using map
 	const promises = productTypeValues.map(async (productTypeFields) => {
 		const { retriever, llmService, systemPrompt, userPrompt, sectionTitle } = productTypeFields;
