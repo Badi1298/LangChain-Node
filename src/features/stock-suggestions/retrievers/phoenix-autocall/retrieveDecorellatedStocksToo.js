@@ -33,7 +33,7 @@ async function retrieveDecorrelatedStocks({
 	// Ensure IDs are strings for comparison with Pinecone string IDs later
 	const selectedStockIDs = selectedStocks.map((s) => String(s.id));
 
-	if (!referenceCountry || referenceSectors.length === 0) {
+	if (!referenceCountry || decorrelatedSectors.length === 0) {
 		console.error(
 			"[Retrieval] Error: Selected stock(s) missing 'country' or 'sector'. Received:",
 			referenceStock
@@ -42,7 +42,7 @@ async function retrieveDecorrelatedStocks({
 	}
 
 	console.log(
-		`[Retrieval] Context: Country='${referenceCountry}', Sector='${referenceSectors.join(", ")}'`
+		`[Retrieval] Context: Country='${referenceCountry}', Sectors='${decorrelatedSectors.join(", ")}'`
 	);
 
 	// Calculate volatility range using 'volatility_6' from the INPUT data
@@ -96,7 +96,7 @@ async function retrieveDecorrelatedStocks({
 	const filterCriteriaForPinecone = {
 		$and: [
 			{ country: { $eq: referenceCountry } },
-			{ sector: { $nin: referenceSectors } },
+			{ sector: { $in: decorrelatedSectors } },
 			{
 				[pineconeVolatilityFilterKey]: {
 					$gte: volatilityLowerBound,

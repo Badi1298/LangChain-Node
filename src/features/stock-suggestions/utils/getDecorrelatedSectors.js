@@ -16,7 +16,7 @@ const getDecorrelatedSectors = (sectors) => {
 		}
 	});
 
-	return Array.from(decorrelatedSectors).join(", ");
+	return Array.from(decorrelatedSectors);
 };
 
 module.exports = {
