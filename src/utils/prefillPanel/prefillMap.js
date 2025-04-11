@@ -1,5 +1,5 @@
 const { ProductTypesId } = require("../../config/constants.js");
-const prefillPanelFields = require("../../../config/prefillPanelFields");
+const prefillPanelFields = require("../../config/prefillPanelFields.js");
 
 module.exports = {
 	[ProductTypesId.REVERSE_CONVERTIBLE]: {
