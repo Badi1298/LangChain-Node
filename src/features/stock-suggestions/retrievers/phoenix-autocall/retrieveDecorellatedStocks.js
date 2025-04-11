@@ -12,7 +12,7 @@ async function retrieveDecorrelatedStocks({
 	selectedStocks, // Input array with structure { id, country, sector, volatility_6, ... }
 	pineconeIndex,
 	vectorDimension, // Assuming this is passed in or available in the context
-	topK = 10,
+	topK,
 }) {
 	if (!selectedStocks || selectedStocks.length === 0) {
 		console.error("Retrieval Error: No selected stocks provided for context.");
@@ -39,9 +39,7 @@ async function retrieveDecorrelatedStocks({
 	}
 
 	console.log(
-		`[Retrieval] Context: Country='${referenceCountry}', Sector='${referenceSectors.join(
-			", "
-		)}'`
+		`[Retrieval] Context: Country='${referenceCountry}', Sector='${referenceSectors.join(", ")}'`
 	);
 
 	// Calculate volatility range using 'volatility_6' from the INPUT data
@@ -106,10 +104,7 @@ async function retrieveDecorrelatedStocks({
 	};
 
 	// --- 4. Execute Pinecone Query ---
-	console.log(
-		"[Retrieval] Querying Pinecone with filter:",
-		JSON.stringify(filterCriteriaForPinecone)
-	);
+	console.log("[Retrieval] Querying Pinecone with filter:", JSON.stringify(filterCriteriaForPinecone));
 	try {
 		const zeroVector = new Array(vectorDimension).fill(0);
 		const initialTopK = topK * 5 + selectedStocks.length; // Fetch more for post-filtering
@@ -122,9 +117,7 @@ async function retrieveDecorrelatedStocks({
 			includeValues: false,
 		});
 
-		console.log(
-			`[Retrieval] Pinecone returned ${queryResponse.matches?.length || 0} potential matches.`
-		);
+		console.log(`[Retrieval] Pinecone returned ${queryResponse.matches?.length || 0} potential matches.`);
 
 		// --- 5. Process Results ---
 		if (!queryResponse.matches || queryResponse.matches.length === 0) {
@@ -140,9 +133,7 @@ async function retrieveDecorrelatedStocks({
 				...match.metadata, // Spread the retrieved metadata
 			}));
 
-		console.log(
-			`[Retrieval] Returning ${retrievedStocks.length} decorrelated stock suggestions.`
-		);
+		console.log(`[Retrieval] Returning ${retrievedStocks.length} decorrelated stock suggestions.`);
 		return retrievedStocks;
 	} catch (error) {
 		console.error("[Retrieval] Error querying Pinecone:", error.message || error);

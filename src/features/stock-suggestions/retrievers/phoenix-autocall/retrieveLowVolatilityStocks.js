@@ -8,12 +8,7 @@
  * @param {number} [topK=10] - The maximum number of results to retrieve.
  * @returns {Promise<Array<object>>} - Promise resolving to an array of retrieved stock metadata objects including their IDs.
  */
-async function retrieveLowVolatilityHLRatioStocks({
-	selectedStocks,
-	pineconeIndex,
-	vectorDimension,
-	topK = 10,
-}) {
+async function retrieveLowVolatilityHLRatioStocks({ selectedStocks, pineconeIndex, vectorDimension, topK }) {
 	if (!selectedStocks || selectedStocks.length === 0) {
 		console.error("[Retrieval LowVolHL] Error: No selected stocks provided for context.");
 		return [];
@@ -29,9 +24,7 @@ async function retrieveLowVolatilityHLRatioStocks({
 	// Get unique sectors from all selected stocks
 	const referenceSectors = [...new Set(selectedStocks.map((s) => s.sector).filter(Boolean))];
 	// Get unique industries from all selected stocks (handle potentially missing industry)
-	const referenceIndustries = [
-		...new Set(selectedStocks.map((s) => s.sub_sector).filter(Boolean)),
-	];
+	const referenceIndustries = [...new Set(selectedStocks.map((s) => s.sub_sector).filter(Boolean))];
 	// Ensure IDs are strings for comparison with Pinecone string IDs later
 	const selectedStockIDs = selectedStocks.map((s) => String(s.id));
 
@@ -51,10 +44,7 @@ async function retrieveLowVolatilityHLRatioStocks({
 
 	// --- 2. Construct Pinecone Filter ---
 	// We want stocks IN the same sectors and industries (if provided)
-	const filterConditions = [
-		{ country: { $eq: referenceCountry } },
-		{ sector: { $in: referenceSectors } },
-	];
+	const filterConditions = [{ country: { $eq: referenceCountry } }, { sector: { $in: referenceSectors } }];
 
 	const filterCriteriaForPinecone = {
 		$and: filterConditions,
@@ -88,9 +78,7 @@ async function retrieveLowVolatilityHLRatioStocks({
 		});
 
 		console.log(
-			`[Retrieval LowVolHL] Pinecone returned ${
-				queryResponse.matches?.length || 0
-			} potential matches.`
+			`[Retrieval LowVolHL] Pinecone returned ${queryResponse.matches?.length || 0} potential matches.`
 		);
 
 		// --- 4. Process Results ---
