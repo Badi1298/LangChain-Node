@@ -1,4 +1,7 @@
 const { stockSuggestionConfigs } = require("../features/stock-suggestions/config.js");
+const {
+	getRelevantStockSuggestions,
+} = require("../features/stock-suggestions/helpers/getRelevantStockSuggestions.js");
 
 exports.computeStockSuggestions = async (req, res) => {
 	const { selectedStocks, productType } = req.body;
@@ -16,16 +19,8 @@ exports.computeStockSuggestions = async (req, res) => {
 
 	const responseJson = [];
 
-	const uniqueStocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))];
-	let productTypeValues = [];
-
-	if (productType === 2) {
-		if (uniqueStocksSubSectors.length === 1) {
-			productTypeValues = Object.values(stockSuggestionConfigs[productType].sameSubSectors);
-		} else {
-			productTypeValues = Object.values(stockSuggestionConfigs[productType].differentSubSectors);
-		}
-	}
+	const context = { selectedStocks };
+	const productTypeValues = getRelevantStockSuggestions(productType, context, stockSuggestionConfigs);
 
 	if (productTypeValues.length === 0) {
 		return res.status(400).json({

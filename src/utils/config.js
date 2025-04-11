@@ -1,4 +1,3 @@
-// config.js
 require("dotenv").config();
 
 const config = {
@@ -17,9 +16,7 @@ const config = {
 
 // Basic validation on startup
 if (!config.pinecone.apiKey || !config.openai.apiKey) {
-	console.error(
-		"CRITICAL ERROR: Missing PINECONE_API_KEY or OPENAI_API_KEY in environment variables."
-	);
+	console.error("CRITICAL ERROR: Missing PINECONE_API_KEY or OPENAI_API_KEY in environment variables.");
 	process.exit(1); // Stop the application if critical config is missing
 }
 

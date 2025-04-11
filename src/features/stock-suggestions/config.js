@@ -30,6 +30,12 @@ const stockSuggestionConfigs = {
 				sectionTitle: "Similar underlyings with volatility lower than usual",
 			},
 		],
+		selector: (context) => {
+			const uniqueStocksSubSectors = [
+				...new Set(context.selectedStocks.map((stock) => stock.sub_sector)),
+			];
+			return uniqueStocksSubSectors.length === 1 ? "sameSubSectors" : "differentSubSectors";
+		},
 	},
 };
 
