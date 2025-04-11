@@ -1,36 +1,36 @@
-const { stockSuggestionFields } = require("../features/stock-suggestions/config.js");
+const { stockSuggestionConfigs } = require("../features/stock-suggestions/config.js");
 
 exports.computeStockSuggestions = async (req, res) => {
 	const { selectedStocks, productType } = req.body;
 
 	if (!selectedStocks || !Array.isArray(selectedStocks) || selectedStocks.length === 0) {
-		return res
-			.status(400)
-			.json({ error: "Missing or invalid 'selectedStocks' array in request body." });
+		return res.status(400).json({ error: "Missing or invalid 'selectedStocks' array in request body." });
 	}
 
 	const pineconeIndex = req.app.locals.pineconeIndex;
 	const vectorDimension = req.app.locals.vectorDimension;
 
 	if (!pineconeIndex || !vectorDimension) {
-		return res
-			.status(500)
-			.json({ error: "Pinecone index or vector dimension not initialized." });
+		return res.status(500).json({ error: "Pinecone index or vector dimension not initialized." });
 	}
 
 	const responseJson = [];
 
 	const uniqueStocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))];
-	let productTypeValues = {};
+	let productTypeValues = [];
 
 	if (productType === 2) {
 		if (uniqueStocksSubSectors.length === 1) {
-			productTypeValues = Object.values(stockSuggestionFields[productType].sameSubSectors);
+			productTypeValues = Object.values(stockSuggestionConfigs[productType].sameSubSectors);
 		} else {
-			productTypeValues = Object.values(
-				stockSuggestionFields[productType].differentSubSectors
-			);
+			productTypeValues = Object.values(stockSuggestionConfigs[productType].differentSubSectors);
 		}
+	}
+
+	if (productTypeValues.length === 0) {
+		return res.status(400).json({
+			error: "Current Product Type not supported or no valid product type values found.",
+		});
 	}
 
 	// Create an array of promises using map
@@ -127,9 +127,11 @@ exports.computeStockSuggestions = async (req, res) => {
 		if (!res.headersSent) {
 			res.status(statusCode).json({ error: errorMessage });
 		} else {
-			console.error(
-				"[API Route] Attempted to send error response, but headers were already sent."
-			);
+			console.error("[API Route] Attempted to send error response, but headers were already sent.");
 		}
 	}
+};
+
+const computeProductTypeValues = ({ productType, uniqueStocksSubSectors }) => {
+	return {}[productType];
 };

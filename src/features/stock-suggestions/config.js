@@ -4,7 +4,7 @@ const { llms } = require("./services/index.js");
 const { phoenixAutocallPrompts } = require("./prompts/index.js");
 const { phoenixAutocallRetrievers } = require("./retrievers/phoenix-autocall/index.js");
 
-const stockSuggestionFields = {
+const stockSuggestionConfigs = {
 	[ProductTypesId.PHOENIX_AUTOCALL]: {
 		sameSubSectors: [
 			{
@@ -33,4 +33,4 @@ const stockSuggestionFields = {
 	},
 };
 
-module.exports = { stockSuggestionFields };
+module.exports = { stockSuggestionConfigs };
