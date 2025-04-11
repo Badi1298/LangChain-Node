@@ -14,7 +14,7 @@ const stockSuggestionFields = {
 			retriever: phoenixAutocallRetriever.volatility,
 			systemPrompt: phoenixAutocallPrompts.volatility.system,
 			userPrompt: phoenixAutocallPrompts.volatility.user,
-			sectionTitle: "Similar underlyings with volatility higher than usual",
+			sectionTitle: "Similar underlyings with volatility lower than usual",
 		},
 	],
 };
