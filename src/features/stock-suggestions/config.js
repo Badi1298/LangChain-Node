@@ -4,7 +4,13 @@ const { phoenixAutocallRetrievers } = require("./retrievers/phoenix-autocall/ind
 
 const stockSuggestionFields = {
 	[ProductTypesId.PHOENIX_AUTOCALL]: {
-		sameSubSectors: [],
+		sameSubSectors: [
+			{
+				retriever: phoenixAutocallRetrievers.similarVolatility,
+				userPrompt: phoenixAutocallPrompts.similarVolatility.user,
+				sectionTitle: "Same sector, similar volatility",
+			},
+		],
 		differentSubSectors: [
 			{
 				retriever: phoenixAutocallRetrievers.decorrelation,

@@ -1,6 +1,4 @@
-const systemPrompt = `You are a financial analyst assistant. Your task is to compare a list of potential stock suggestions against a list of currently selected stocks based only on the recent earnings data and news summaries. Identify up to 5 suggestions that show fundamentally stronger recent performance or outlook compared to the original selection.`;
-
-const userPrompt = ({ selectedInfo, suggestionsInfo }) => {
+const userPromptTemplate = ({ selectedInfo, suggestionsInfo }) => {
 	return `
         **Objective:** Analyze the provided lists of stocks ('selectedStocks' and 'suggestedStocks') to identify superior investment prospects based on recent fundamental data.
 
@@ -28,4 +26,8 @@ const userPrompt = ({ selectedInfo, suggestionsInfo }) => {
 
         **Important:** Your analysis and selection *must* be based on the information retrieved via grounding/web search regarding recent earnings and corporate news. Do not rely on pre-existing knowledge without verification. Ensure the timeframe for news is respected - last 6 months.
         `;
+};
+
+module.exports = {
+	user: userPromptTemplate,
 };

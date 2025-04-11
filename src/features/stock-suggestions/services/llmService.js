@@ -25,19 +25,11 @@ async function generateStockSuggestions({
 
 	// --- 1. Prepare Context for Prompt ---
 	// Use the first selected stock for primary context
-	const referenceStock = selectedStocks[0];
 	const stocksName = selectedStocks.map((stock) => stock.name).join(", ");
 	const stocksSector = [...new Set(selectedStocks.map((stock) => stock.sector))].join(", ");
 	const stocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))].join(
 		", "
 	);
-
-	const selectedInfo = `Stocks Name: ${stocksName} (Sectors: ${stocksSector})`;
-
-	// Format suggested stocks concisely
-	const suggestionsInfo = retrievalResults
-		.map((stock) => `- ${stock.name} (Sector: ${stock.sector}, Industry: ${stock.sub_sector})`)
-		.join("\n");
 
 	// --- 3. Call OpenAI API ---
 	try {
@@ -51,8 +43,8 @@ async function generateStockSuggestions({
 				{
 					role: "user",
 					content: userPrompt({
-						selectedInfo,
-						suggestionsInfo,
+						selectedInfo: selectedStocks,
+						suggestionsInfo: retrievalResults,
 						stocksName,
 						stocksSector,
 						stocksSubSectors,
