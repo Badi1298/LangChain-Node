@@ -1,12 +1,12 @@
 const { ProductTypesSuggestionsMap } = require("../../../config/constants.js");
 
 /**
- * Determines the strategy key ('sameSubSectors' or 'differentSubSectors')
+ * Determines the selector key ('sameSubSectors' or 'differentSubSectors')
  * based on the uniqueness of sub-sectors in the selected stocks.
  * @param {object} context - The context object.
  * @param {Array<object>} context.selectedStocks - Array of selected stock objects.
  * @param {string} context.selectedStocks[].sub_sector - The sub-sector of a stock.
- * @returns {'sameSubSectors' | 'differentSubSectors'} - The strategy key.
+ * @returns {'sameSubSectors' | 'differentSubSectors'} - The selector key.
  */
 const phoenixAutocallSelector = (context) => {
 	if (!context || !Array.isArray(context.selectedStocks)) {
