@@ -1,5 +1,5 @@
-const { openAiSuggestions } = require("./openAiLLM.js");
-const { geminiSuggestions } = require("./geminiLLM.js");
+const { openAiSuggestions } = require("./llms/openAiLLM.js");
+const { geminiSuggestions } = require("./llms/geminiLLM.js");
 
 module.exports = {
 	llms: {

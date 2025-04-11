@@ -3,7 +3,7 @@ const { ProductTypesId, ProductTypesSuggestionsMap } = require("../../config/con
 const { llms } = require("./services/index.js");
 const { selectors } = require("./utils/getSuggestionSelector.js");
 const { phoenixAutocallPrompts } = require("./prompts/index.js");
-const { phoenixAutocallRetrievers } = require("./retrievers/phoenix-autocall/index.js");
+const { phoenixAutocallRetrievers } = require("./retrievers/index.js");
 
 const stockSuggestionConfigs = {
 	[ProductTypesId.PHOENIX_AUTOCALL]: {
