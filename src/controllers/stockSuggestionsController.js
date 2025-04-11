@@ -1,7 +1,7 @@
 const { stockSuggestionConfigs } = require("../features/stock-suggestions/config.js");
 const {
 	getRelevantStockSuggestions,
-} = require("../features/stock-suggestions/helpers/getRelevantStockSuggestions.js");
+} = require("../features/stock-suggestions/utils/getRelevantStockSuggestions.js");
 
 exports.computeStockSuggestions = async (req, res) => {
 	const { selectedStocks, productType } = req.body;
@@ -27,6 +27,9 @@ exports.computeStockSuggestions = async (req, res) => {
 			error: "Current Product Type not supported or no valid product type values found.",
 		});
 	}
+
+	console.log(productTypeValues);
+	return;
 
 	// Create an array of promises using map
 	const promises = productTypeValues.map(async (productTypeFields) => {
