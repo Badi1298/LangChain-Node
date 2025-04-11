@@ -1,5 +1,5 @@
-const { retrieveDecorrelatedStocks } = require("./decorellatedStocks.js");
-const { retrieveLowVolatilityHLRatioStocks } = require("./highVolatility.js");
+const { retrieveDecorrelatedStocks } = require("./retrieveDecorellatedStocks.js");
+const { retrieveLowVolatilityHLRatioStocks } = require("./retrieveLowVolatilityStocks.js");
 
 module.exports = {
 	phoenixAutocallRetriever: {
