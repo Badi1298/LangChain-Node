@@ -15,7 +15,7 @@ async function geminiGrounded(selectedStocks, retrievalResults, userPrompt) {
 
 	const response = await ai.models.generateContent({
 		model: "gemini-2.0-flash",
-		contents: [userPrompt({ selectedStocks, suggestionsInfo: retrievalResults })],
+		contents: [userPrompt({ selectedInfo: selectedStocks, suggestionsInfo: retrievalResults })],
 		config: {
 			tools: [{ googleSearch: {} }],
 		},
