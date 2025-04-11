@@ -1,6 +1,7 @@
 const { ProductTypesId } = require("../../config/constants.js");
 
 const { llms } = require("./services/index.js");
+const { selectors } = require("./utils/getSuggestionSelector.js");
 const { phoenixAutocallPrompts } = require("./prompts/index.js");
 const { phoenixAutocallRetrievers } = require("./retrievers/phoenix-autocall/index.js");
 
@@ -30,12 +31,7 @@ const stockSuggestionConfigs = {
 				sectionTitle: "Similar underlyings with volatility lower than usual",
 			},
 		],
-		selector: (context) => {
-			const uniqueStocksSubSectors = [
-				...new Set(context.selectedStocks.map((stock) => stock.sub_sector)),
-			];
-			return uniqueStocksSubSectors.length === 1 ? "sameSubSectors" : "differentSubSectors";
-		},
+		selector: selectors.phoenixAutocallSelector,
 	},
 };
 
