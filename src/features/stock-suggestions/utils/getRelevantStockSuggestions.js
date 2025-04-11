@@ -8,8 +8,8 @@ function getRelevantStockSuggestions(productType, context, allConfigs) {
 
 	// Check if a selector function exists
 	if (typeof configForProduct.selector === "function") {
-		const selectedKey = configForProduct.selector(context); // Determine the key ('sameSubSectors', 'differentSubSectors', etc.)
-		return configForProduct[selectedKey] || []; // Return the array associated with that key
+		const selectedKey = configForProduct.selector(context);
+		return configForProduct[selectedKey] || [];
 	} else {
 		// Fallback if no selector is defined for this product type
 		console.warn(`No suggestion selector function defined for product type: ${productType}`);

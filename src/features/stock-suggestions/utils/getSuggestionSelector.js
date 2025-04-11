@@ -1,3 +1,5 @@
+const { ProductTypesSuggestionsMap } = require("../../../config/constants.js");
+
 /**
  * Determines the strategy key ('sameSubSectors' or 'differentSubSectors')
  * based on the uniqueness of sub-sectors in the selected stocks.
@@ -13,7 +15,9 @@ const phoenixAutocallSelector = (context) => {
 		return "differentSubSectors"; // Or throw an error
 	}
 	const uniqueStocksSubSectors = [...new Set(context.selectedStocks.map((stock) => stock.sub_sector))];
-	return uniqueStocksSubSectors.length === 1 ? "sameSubSectors" : "differentSubSectors";
+	return uniqueStocksSubSectors.length === 1
+		? ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.SAME_SUB_SECTORS
+		: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DIFFERENT_SUB_SECTORS;
 };
 
 module.exports = {
