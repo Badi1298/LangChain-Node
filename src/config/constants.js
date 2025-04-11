@@ -22,4 +22,14 @@ const RedemptionTypes = Object.freeze({
 	PHYSICAL: 2,
 });
 
-module.exports = { IssuersId, ProductTypesId, Frequencies, RedemptionTypes };
+const ProductTypesSuggestionsMap = Object.freeze({
+	PHOENIX_AUTOCALL: {
+		SAME_SUB_SECTORS: "sameSubSectors",
+		DIFFERENT_SUB_SECTORS: "differentSubSectors",
+		IMPROVE_LEVEL: "Optimal suggestions to improve Level",
+		DECORRELATION: "Same country, improved decorrelation/volatility",
+		LOW_VOLATILITY: "Similar underlyings with volatility lower than usual",
+	},
+});
+
+module.exports = { IssuersId, ProductTypesId, Frequencies, RedemptionTypes, ProductTypesSuggestionsMap };

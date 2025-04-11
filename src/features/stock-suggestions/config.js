@@ -1,4 +1,4 @@
-const { ProductTypesId } = require("../../config/constants.js");
+const { ProductTypesId, ProductTypesSuggestionsMap } = require("../../config/constants.js");
 
 const { llms } = require("./services/index.js");
 const { selectors } = require("./utils/getSuggestionSelector.js");
@@ -7,28 +7,28 @@ const { phoenixAutocallRetrievers } = require("./retrievers/phoenix-autocall/ind
 
 const stockSuggestionConfigs = {
 	[ProductTypesId.PHOENIX_AUTOCALL]: {
-		sameSubSectors: [
+		[ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.SAME_SUB_SECTORS]: [
 			{
 				retriever: phoenixAutocallRetrievers.similarVolatility,
 				llmService: llms.geminiSuggestions,
 				userPrompt: phoenixAutocallPrompts.similarVolatility.user,
-				sectionTitle: "Optimal suggestions to improve Level",
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.IMPROVE_LEVEL,
 			},
 		],
-		differentSubSectors: [
+		[ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DIFFERENT_SUB_SECTORS]: [
 			{
 				retriever: phoenixAutocallRetrievers.decorrelation,
 				llmService: llms.openAiSuggestions,
 				systemPrompt: phoenixAutocallPrompts.decorrelation.system,
 				userPrompt: phoenixAutocallPrompts.decorrelation.user,
-				sectionTitle: "Same country, improved decorrelation/volatility",
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DECORRELATION,
 			},
 			{
 				retriever: phoenixAutocallRetrievers.volatility,
 				llmService: llms.openAiSuggestions,
 				systemPrompt: phoenixAutocallPrompts.volatility.system,
 				userPrompt: phoenixAutocallPrompts.volatility.user,
-				sectionTitle: "Similar underlyings with volatility lower than usual",
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.LOW_VOLATILITY,
 			},
 		],
 		selector: selectors.phoenixAutocallSelector,
