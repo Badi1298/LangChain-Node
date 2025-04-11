@@ -1,4 +1,4 @@
-const openai = require("../../../services/openaiClient.js");
+const openai = require("../../../../services/openaiClient.js");
 
 /**
  * Generates an explanation for stock decorrelation using an LLM.

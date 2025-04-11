@@ -1,3 +1,5 @@
+const { getDecorrelatedSectors } = require("../../utils/getDecorrelatedSectors.js");
+
 /**
  * Retrieves stock suggestions based on finding decorrelated sectors within the same country
  * and a specific volatility range relative to selected stocks.
@@ -27,6 +29,7 @@ async function retrieveDecorrelatedStocks({
 	const referenceStock = selectedStocks[0]; // Use first stock for context
 	const referenceCountry = referenceStock?.country;
 	const referenceSectors = [...new Set(selectedStocks.map((s) => s.sector))];
+	const decorrelatedSectors = getDecorrelatedSectors(referenceSectors);
 	// Ensure IDs are strings for comparison with Pinecone string IDs later
 	const selectedStockIDs = selectedStocks.map((s) => String(s.id));
 
