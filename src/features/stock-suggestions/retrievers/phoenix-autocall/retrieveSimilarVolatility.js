@@ -50,9 +50,7 @@ async function retrieveSimilarVolatilityStocks({
 		);
 	}
 
-	console.log(
-		`[Similar Vol] Context: Country='${referenceCountry}', Sub-Sector='${referenceSubSector}'`
-	);
+	console.log(`[Similar Vol] Context: Country='${referenceCountry}', Sub-Sector='${referenceSubSector}'`);
 
 	// Calculate volatility range using 'volatility_6' from the INPUT data
 	let minVolatility = Infinity;
@@ -80,7 +78,7 @@ async function retrieveSimilarVolatilityStocks({
 
 	// This minimum volatility will be the lower bound for the Pinecone query
 	const volatilityLowerBound = minVolatility;
-	const volatilityUpperBound = maxVolatility + 20;
+	const volatilityUpperBound = maxVolatility + 10;
 	console.log(
 		`[Similar Vol] Calculated Minimum Volatility (using input volatility_6): ${volatilityLowerBound.toFixed(
 			4
@@ -113,10 +111,7 @@ async function retrieveSimilarVolatilityStocks({
 	};
 
 	// --- 3. Execute Pinecone Query ---
-	console.log(
-		"[Similar Vol] Querying Pinecone with filter:",
-		JSON.stringify(filterCriteriaForPinecone)
-	);
+	console.log("[Similar Vol] Querying Pinecone with filter:", JSON.stringify(filterCriteriaForPinecone));
 	try {
 		// Using a zero vector because we are filtering based on metadata, not vector similarity.
 		const zeroVector = new Array(vectorDimension).fill(0);
@@ -132,9 +127,7 @@ async function retrieveSimilarVolatilityStocks({
 		});
 
 		console.log(
-			`[Similar Vol] Pinecone returned ${
-				queryResponse.matches?.length || 0
-			} potential matches.`
+			`[Similar Vol] Pinecone returned ${queryResponse.matches?.length || 0} potential matches.`
 		);
 
 		// --- 4. Process Results ---

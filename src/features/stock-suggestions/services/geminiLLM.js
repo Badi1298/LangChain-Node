@@ -13,6 +13,9 @@ async function geminiSuggestions({ selectedStocks, retrievalResults, userPrompt 
 		return;
 	}
 
+	const MODEL = "gemini-2.0-flash";
+	// const MODEL = "gemini-2.5-pro-exp-03-25";
+
 	const selectedStocksNames = selectedStocks.map((stock) => stock.name).join(", ");
 	const suggestedStocksNames = retrievalResults.map((stock) => stock.name).join(", ");
 
@@ -22,7 +25,7 @@ async function geminiSuggestions({ selectedStocks, retrievalResults, userPrompt 
 	});
 
 	const response = await ai.models.generateContent({
-		model: "gemini-2.0-flash",
+		model: MODEL,
 		contents: [finalContent],
 		config: {
 			tools: [{ googleSearch: {} }],

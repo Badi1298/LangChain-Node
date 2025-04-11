@@ -22,9 +22,16 @@ async function openAiSuggestions({ selectedStocks, retrievalResults, systemPromp
 	// Use the first selected stock for primary context
 	const stocksName = selectedStocks.map((stock) => stock.name).join(", ");
 	const stocksSector = [...new Set(selectedStocks.map((stock) => stock.sector))].join(", ");
-	const stocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))].join(
-		", "
-	);
+	const stocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))].join(", ");
+	const suggestedStocksName = retrievalResults.map((stock) => stock.name).join(", ");
+
+	const userMessage = userPrompt({
+		selectedInfo: stocksName,
+		suggestionsInfo: suggestedStocksName,
+		stocksName,
+		stocksSector,
+		stocksSubSectors,
+	});
 
 	// --- 3. Call OpenAI API ---
 	try {
@@ -35,16 +42,7 @@ async function openAiSuggestions({ selectedStocks, retrievalResults, systemPromp
 			model: chatModel, // Use the specified chat model
 			messages: [
 				{ role: "system", content: systemPrompt },
-				{
-					role: "user",
-					content: userPrompt({
-						selectedInfo: selectedStocks,
-						suggestionsInfo: retrievalResults,
-						stocksName,
-						stocksSector,
-						stocksSubSectors,
-					}),
-				},
+				{ role: "user", content: userMessage },
 			],
 			temperature: 0.5, // Adjust for desired creativity/factuality balance
 			max_tokens: 500, // Adjust based on expected length (e.g., 10 stocks * 2 lines * ~20 tokens/line)
