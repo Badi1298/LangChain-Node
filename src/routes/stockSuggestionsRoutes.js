@@ -4,7 +4,9 @@ const router = express.Router();
 
 const stockSuggestionsController = require("../controllers/stockSuggestionsController");
 
-const { generateStockSuggestions } = require("../services/llmService.js");
+const {
+	generateStockSuggestions,
+} = require("../features/stock-suggestions/services/llmService.js");
 
 const { stockSuggestionFields } = require("../features/stock-suggestions/config.js");
 
