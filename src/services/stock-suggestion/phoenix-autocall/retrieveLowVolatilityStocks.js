@@ -3,7 +3,6 @@
  * with the lowest 52-week high/low volatility ratio.
  *
  * @param {Array<object>} selectedStocks - Array of currently selected stock objects.
- * Expected structure: { id (number), country (string), sector (string), industry? (string), ... }.
  * @param {Pinecone.Index} pineconeIndex - Initialized Pinecone index object.
  * @param {number} vectorDimension - The dimension of the vectors in the Pinecone index.
  * @param {number} [topK=10] - The maximum number of results to retrieve.
