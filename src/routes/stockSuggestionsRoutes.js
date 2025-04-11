@@ -4,10 +4,8 @@ const router = express.Router();
 
 const stockSuggestionsController = require("../controllers/stockSuggestionsController");
 
-const {
-	generateStockSuggestions,
-} = require("../features/stock-suggestions/services/llmService.js");
-const { geminiGrounded } = require("../features/stock-suggestions/services/geminiLLM.js");
+const { openAiSuggestions } = require("../features/stock-suggestions/services/openAiLLM.js");
+const { geminiSuggestions } = require("../features/stock-suggestions/services/geminiLLM.js");
 
 const { stockSuggestionFields } = require("../features/stock-suggestions/config.js");
 
@@ -72,7 +70,7 @@ router.post("/stock-suggestions", async (req, res) => {
 				);
 
 				// Generate explanation using LLM
-				explanation = await geminiGrounded({
+				explanation = await geminiSuggestions({
 					selectedStocks,
 					retrievalResults,
 					systemPrompt,

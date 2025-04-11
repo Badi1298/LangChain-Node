@@ -7,12 +7,7 @@ const openai = require("../../../services/openaiClient.js");
  * @param {Array<object>} retrievalResults - The stocks retrieved from Pinecone.
  * @returns {Promise<string>} - A string containing the LLM-generated explanation.
  */
-async function generateStockSuggestions({
-	selectedStocks,
-	retrievalResults,
-	systemPrompt,
-	userPrompt,
-}) {
+async function openAiSuggestions({ selectedStocks, retrievalResults, systemPrompt, userPrompt }) {
 	if (
 		!selectedStocks ||
 		selectedStocks.length === 0 ||
@@ -73,5 +68,5 @@ async function generateStockSuggestions({
 }
 
 module.exports = {
-	generateStockSuggestions,
+	openAiSuggestions,
 };
