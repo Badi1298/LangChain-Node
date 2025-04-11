@@ -6,7 +6,7 @@ const stockSuggestionsController = require("../controllers/stockSuggestionsContr
 
 const { generateStockSuggestions } = require("../services/llmService.js");
 
-const { stockSuggestionFields } = require("../services/stock-suggestion/index.js");
+const { stockSuggestionFields } = require("../features/stock-suggestions/config.js");
 
 router.post("/stock-suggestions", async (req, res) => {
 	const { selectedStocks, productType } = req.body;
