@@ -1,5 +1,5 @@
 const userPromptTemplate = ({ selectedInfo, suggestionsInfo }) => {
-	return `
+	const promptText = `
         **Objective:** Analyze the provided lists of stocks ('selectedStocks' and 'suggestedStocks') to identify superior investment prospects based on recent fundamental data.
 
         **Input:**
@@ -24,8 +24,11 @@ const userPromptTemplate = ({ selectedInfo, suggestionsInfo }) => {
         **Output Format:**
         **[Suggested Stock Name]**: Brief justification summarizing the superior fundamental factors (based on recent earnings/news).
 
+        **Important:** The final answer should ONLY contain the output, which is the **up to 5 stocks** selected from the 'suggested stocks' and their justification. Do not include any additional commentary or explanations outside of the specified format.
         **Important:** Your analysis and selection *must* be based on the information retrieved via grounding/web search regarding recent earnings and corporate news. Do not rely on pre-existing knowledge without verification. Ensure the timeframe for news is respected - last 6 months.
         `;
+
+	return { role: "user", parts: [{ text: promptText }] };
 };
 
 module.exports = {

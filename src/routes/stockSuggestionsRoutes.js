@@ -7,6 +7,7 @@ const stockSuggestionsController = require("../controllers/stockSuggestionsContr
 const {
 	generateStockSuggestions,
 } = require("../features/stock-suggestions/services/llmService.js");
+const { geminiGrounded } = require("../features/stock-suggestions/services/geminiLLM.js");
 
 const { stockSuggestionFields } = require("../features/stock-suggestions/config.js");
 
@@ -29,7 +30,7 @@ router.post("/stock-suggestions", async (req, res) => {
 	}
 
 	const responseJson = [];
-	const productTypeValues = Object.values(stockSuggestionFields[productType]);
+	const productTypeValues = Object.values(stockSuggestionFields[productType].sameSubSectors);
 
 	// Create an array of promises using map
 	const promises = productTypeValues.map(async (productTypeFields) => {
@@ -44,8 +45,8 @@ router.post("/stock-suggestions", async (req, res) => {
 			throw error;
 		}
 
-		if (!systemPrompt || !userPrompt) {
-			const error = new Error("Missing system or user prompt for LLM generation.");
+		if (!userPrompt) {
+			const error = new Error("Missing user prompt for LLM generation.");
 			error.statusCode = 400;
 			throw error;
 		}
@@ -71,7 +72,7 @@ router.post("/stock-suggestions", async (req, res) => {
 				);
 
 				// Generate explanation using LLM
-				explanation = await generateStockSuggestions({
+				explanation = await geminiGrounded({
 					selectedStocks,
 					retrievalResults,
 					systemPrompt,

@@ -1,8 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
+const { GoogleGenAI } = require("@google/genai");
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-async function geminiGrounded(selectedStocks, retrievalResults, userPrompt) {
+async function geminiGrounded({ selectedStocks, retrievalResults, userPrompt }) {
+	console.log(selectedStocks, retrievalResults, userPrompt);
 	if (
 		!selectedStocks ||
 		selectedStocks.length === 0 ||
@@ -13,9 +14,17 @@ async function geminiGrounded(selectedStocks, retrievalResults, userPrompt) {
 		return;
 	}
 
+	const selectedStocksNames = selectedStocks.map((stock) => stock.name).join(", ");
+	const suggestedStocksNames = retrievalResults.map((stock) => stock.name).join(", ");
+
+	const finalContent = userPrompt({
+		selectedInfo: selectedStocksNames,
+		suggestionsInfo: suggestedStocksNames,
+	});
+
 	const response = await ai.models.generateContent({
 		model: "gemini-2.0-flash",
-		contents: [userPrompt({ selectedInfo: selectedStocks, suggestionsInfo: retrievalResults })],
+		contents: [finalContent],
 		config: {
 			tools: [{ googleSearch: {} }],
 		},

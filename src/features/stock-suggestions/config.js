@@ -8,7 +8,7 @@ const stockSuggestionFields = {
 			{
 				retriever: phoenixAutocallRetrievers.similarVolatility,
 				userPrompt: phoenixAutocallPrompts.similarVolatility.user,
-				sectionTitle: "Same sector, similar volatility",
+				sectionTitle: "Optimal suggestions to improve Level",
 			},
 		],
 		differentSubSectors: [
