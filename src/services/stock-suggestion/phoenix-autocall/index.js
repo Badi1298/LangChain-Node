@@ -2,7 +2,7 @@ const { retrieveDecorrelatedStocks } = require("./retrieveDecorellatedStocks.js"
 const { retrieveLowVolatilityHLRatioStocks } = require("./retrieveLowVolatilityStocks.js");
 
 module.exports = {
-	phoenixAutocallRetriever: {
+	phoenixAutocallRetrievers: {
 		decorrelation: retrieveDecorrelatedStocks,
 		volatility: retrieveLowVolatilityHLRatioStocks,
 	},
