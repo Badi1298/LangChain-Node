@@ -33,6 +33,8 @@ async function openAiSuggestions({ selectedStocks, retrievalResults, systemPromp
 		stocksSubSectors,
 	});
 
+	console.log(`[LLM Service] User message: ${userMessage}`);
+
 	// --- 2. Call OpenAI API ---
 	try {
 		const chatModel = "gpt-4o-mini";

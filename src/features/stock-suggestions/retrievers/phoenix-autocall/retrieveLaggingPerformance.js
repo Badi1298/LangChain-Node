@@ -1,3 +1,5 @@
+const { averageVectors } = require("../../helpers/averageVectors.js");
+
 /**
  * Retrieves stock suggestions based on finding stocks in similar sectors/industries
  * with the lowest 3M performances or lowest price 52-week high/low.
@@ -47,12 +49,51 @@ async function retrieveLaggingPerformanceStocks({
 		)}', Industries='${referenceIndustries.join(", ") || "N/A"}'`
 	);
 
-	// --- 2. Construct Pinecone Filter ---
-	// We want stocks IN the same sectors and industries (if provided)
-	const filterConditions = [{ country: { $eq: referenceCountry } }, { sector: { $in: referenceSectors } }];
+	// Fetch vectors for the given IDs
+	console.log(`Workspaceing vectors for IDs: ${selectedStockIDs.join(", ")}`);
+	const fetchResponse = await pineconeIndex.fetch(selectedStockIDs);
 
+	const fetchedVectors = [];
+	// Check response structure (depends slightly on client version, adjust if needed)
+	// For pinecone-database/pinecone v2+: response has a 'records' object
+	const records = fetchResponse.records || {}; // Adapt if structure differs
+	for (const id of selectedStockIDs) {
+		const record = records[id];
+		if (record && record.values) {
+			fetchedVectors.push(record.values);
+		} else {
+			console.warn(`Vector for ID ${id} not found or fetchResponse structure unexpected.`);
+			// Decide how to handle missing vectors: error out, or continue with fewer?
+			// Option: Throw an error
+			// throw new Error(`Vector for ID ${id} not found.`);
+			// Option: Continue (average will be based on found vectors)
+			// continue;
+		}
+	}
+
+	if (fetchedVectors.length === 0) {
+		console.error("Could not retrieve any vectors for the given IDs.");
+		return null;
+	}
+
+	if (fetchedVectors.length < selectedStockIDs.length) {
+		console.warn(
+			`Only found vectors for ${fetchedVectors.length} out of ${selectedStockIDs.length} requested IDs.`
+		);
+	}
+
+	// Average the retrieved vectors
+	console.log(`Averaging ${fetchedVectors.length} vectors...`);
+	const averageQueryVector = averageVectors(fetchedVectors);
+
+	if (!averageQueryVector) {
+		console.error("Failed to compute average vector.");
+		return null;
+	}
+
+	// --- 2. Construct Pinecone Filter ---
 	const filterCriteriaForPinecone = {
-		$and: filterConditions,
+		$and: [{ country: { $eq: referenceCountry } }],
 	};
 
 	// Define the metadata key for sorting
@@ -67,13 +108,12 @@ async function retrieveLaggingPerformanceStocks({
 		JSON.stringify(filterCriteriaForPinecone)
 	);
 	try {
-		const zeroVector = new Array(vectorDimension).fill(0);
 		// Fetch more results initially to increase the pool for sorting by performance
 		// Adjust the multiplier (e.g., 5) as needed based on data density and performance.
 		const initialTopK = topK * 5 + selectedStocks.length;
 
 		const queryResponse = await pineconeIndex.query({
-			vector: zeroVector, // Using zero vector as we rely on metadata filtering + sorting
+			vector: averageQueryVector, // Use the averaged vector
 			filter: filterCriteriaForPinecone,
 			topK: initialTopK,
 			includeMetadata: true, // Essential for getting the performance
@@ -125,6 +165,7 @@ async function retrieveLaggingPerformanceStocks({
 		console.log(
 			`[Retrieval LaggingPerformance] Returning ${retrievedStocks.length} stock suggestions with the lowest '${priceRatioKey}'.`
 		);
+
 		return retrievedStocks;
 	} catch (error) {
 		console.error("[Retrieval LaggingPerformance] Error querying Pinecone:", error.message || error);

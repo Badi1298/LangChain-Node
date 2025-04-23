@@ -15,7 +15,7 @@ const userPromptTemplate = ({
 
         Instructions:
         Choose up to 5 stocks from the suggestions.
-        Provide a brief explanation (1-2 sentences maximum per stock) suggesting potential reasons why this stock might be lagging in performance (e.g., low 3-month return or trading near its 52-week low) despite being in a similar business area as the selected stocks (${stocksName}).
+        Provide a brief explanation (1-2 sentences maximum per stock) suggesting potential reasons why this stock might be lagging in performance (e.g., low 3-month return or trading near its 52-week low) despite being in a similar sectors and/or industry as the selected stocks (${stocksName}).
         Focus on potential company-specific factors, recent negative news or earnings misses, increased competition, specific sub-sector challenges affecting this stock more, poor recent execution, or negative market sentiment shifts impacting its valuation.
         Do not give investment advice. Present the explanations clearly for each suggested stock.
         
