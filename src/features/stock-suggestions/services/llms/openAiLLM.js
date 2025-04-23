@@ -23,17 +23,17 @@ async function openAiSuggestions({ selectedStocks, retrievalResults, systemPromp
 	const stocksName = selectedStocks.map((stock) => stock.name).join(", ");
 	const stocksSector = [...new Set(selectedStocks.map((stock) => stock.sector))].join(", ");
 	const stocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))].join(", ");
-	const suggestedStocksName = retrievalResults.map((stock) => stock.name).join(", ");
+	// const suggestedStocksName = retrievalResults.map((stock) => stock.name).join(", ");
 
 	const userMessage = userPrompt({
 		selectedInfo: stocksName,
-		suggestionsInfo: suggestedStocksName,
+		suggestionsInfo: JSON.stringify(retrievalResults, null, 2), // Format for better readability
 		stocksName,
 		stocksSector,
 		stocksSubSectors,
 	});
 
-	// --- 3. Call OpenAI API ---
+	// --- 2. Call OpenAI API ---
 	try {
 		const chatModel = "gpt-4o-mini";
 		console.log(`[LLM Service] Requesting explanation from ${chatModel}...`);

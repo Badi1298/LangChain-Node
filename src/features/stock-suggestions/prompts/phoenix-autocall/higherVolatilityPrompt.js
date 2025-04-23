@@ -8,7 +8,7 @@ const userPromptTemplate = ({
 	stocksSubSectors,
 }) => {
 	return `
-        The user selected: ${selectedInfo} (Sectors: ${stocksSector}, Industry: ${stocksSubSectors}).
+        The user selected: ${selectedInfo} (Sectors: ${stocksSector}; Industry: ${stocksSubSectors}).
 
         Based on filtering criteria (similar sector/industry, current volatility within the lowest tier of its 52-week high/low range), the following stocks were suggested:
         ${suggestionsInfo}

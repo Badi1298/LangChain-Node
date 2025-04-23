@@ -57,7 +57,7 @@ exports.computeStockSuggestions = async (req, res) => {
 				selectedStocks,
 				pineconeIndex,
 				vectorDimension,
-				topK: 50,
+				topK: 20,
 			});
 
 			// --- Step 2: Generate Explanation (if stocks found) ---

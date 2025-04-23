@@ -13,6 +13,7 @@ async function geminiSuggestions({ selectedStocks, retrievalResults, userPrompt 
 		return;
 	}
 
+	// --- 1. Prepare Context for Prompt ---
 	const MODEL = "gemini-2.0-flash";
 	// const MODEL = "gemini-2.5-pro-exp-03-25";
 
@@ -23,6 +24,14 @@ async function geminiSuggestions({ selectedStocks, retrievalResults, userPrompt 
 		selectedInfo: selectedStocksNames,
 		suggestionsInfo: suggestedStocksNames,
 	});
+
+	// --- 2. Call Gemini API ---
+	try {
+		console.log(`[LLM Service] Requesting explanation from ${MODEL}...`);
+	} catch (error) {
+		console.error("[LLM Service] Error calling Gemini API:", error);
+		return `Error generating explanation: ${error.message || "Unknown API error"}`;
+	}
 
 	const response = await ai.models.generateContent({
 		model: MODEL,
