@@ -11,6 +11,10 @@ const {
 	systemPrompt: decorrelationTooSystem,
 	user: decorrelationTooUser,
 } = require("./phoenix-autocall/decorrelationTooPrompt.js");
+const {
+	systemPrompt: laggingPerformanceSystem,
+	user: laggingPerformanceUser,
+} = require("./phoenix-autocall/laggingPerformancePrompt.js");
 
 module.exports = {
 	phoenixAutocallPrompts: {
@@ -28,6 +32,10 @@ module.exports = {
 		volatility: {
 			system: volatilitySystem,
 			user: volatilityUser,
+		},
+		laggingPerformance: {
+			system: laggingPerformanceSystem,
+			user: laggingPerformanceUser,
 		},
 	},
 };

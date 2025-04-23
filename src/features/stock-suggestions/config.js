@@ -37,6 +37,13 @@ const stockSuggestionConfigs = {
 				userPrompt: phoenixAutocallPrompts.decorrelationToo.user,
 				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DECORRELATION_TOO,
 			},
+			{
+				retriever: phoenixAutocallRetrievers.laggingPerformance,
+				llmService: llms.openAiSuggestions,
+				systemPrompt: phoenixAutocallPrompts.laggingPerformance.system,
+				userPrompt: phoenixAutocallPrompts.laggingPerformance.user,
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.LAGGING_PERFORMANCE,
+			},
 		],
 		selector: selectors.phoenixAutocallSelector,
 	},

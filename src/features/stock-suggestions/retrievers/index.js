@@ -1,6 +1,7 @@
 const { retrieveDecorrelatedStocks } = require("./phoenix-autocall/retrieveDecorellatedStocks.js");
-const { retrieveDecorrelatedStocksToo } = require("./phoenix-autocall/retrieveDecorellatedStocksToo.js");
 const { retrieveSimilarVolatilityStocks } = require("./phoenix-autocall/retrieveSimilarVolatility.js");
+const { retrieveLaggingPerformanceStocks } = require("./phoenix-autocall/retrieveLaggingPerformance.js");
+const { retrieveDecorrelatedStocksToo } = require("./phoenix-autocall/retrieveDecorellatedStocksToo.js");
 const { retrieveLowVolatilityHLRatioStocks } = require("./phoenix-autocall/retrieveLowVolatilityStocks.js");
 
 module.exports = {
@@ -9,5 +10,6 @@ module.exports = {
 		decorrelation: retrieveDecorrelatedStocks,
 		decorrelationToo: retrieveDecorrelatedStocksToo,
 		volatility: retrieveLowVolatilityHLRatioStocks,
+		laggingPerformance: retrieveLaggingPerformanceStocks,
 	},
 };

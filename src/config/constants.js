@@ -30,6 +30,7 @@ const ProductTypesSuggestionsMap = Object.freeze({
 		DECORRELATION: "Same country, improved decorrelation/volatility",
 		DECORRELATION_TOO: "Improve levels through decorrelation",
 		LOW_VOLATILITY: "Similar underlyings with volatility lower than usual",
+		LAGGING_PERFORMANCE: "Similar underlyings with lagging performances",
 	},
 });
 
