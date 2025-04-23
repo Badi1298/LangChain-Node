@@ -35,9 +35,7 @@ function safeParseFloat(value) {
 
 async function runIndexer() {
 	if (!PINECONE_API_KEY || !OPENAI_API_KEY) {
-		console.error(
-			"Error: PINECONE_API_KEY or OPENAI_API_KEY not found in environment variables."
-		);
+		console.error("Error: PINECONE_API_KEY or OPENAI_API_KEY not found in environment variables.");
 		process.exit(1);
 	}
 
@@ -110,11 +108,9 @@ async function runIndexer() {
 					const stockId = String(stock.id);
 
 					// Prepare text for embedding
-					const textToEmbed = `Ticker: ${stock.ticker || ""}, Name: ${
-						stock.name || ""
-					}. Sector: ${stock.sector || ""}, Sub-sector: ${
+					const textToEmbed = `Sector: ${stock.sector || ""}, Sub-sector: ${
 						stock.sub_sector || ""
-					}. Country: ${stock.country || ""}.`;
+					}`;
 					textsToEmbedBatch.push(textToEmbed);
 
 					// Prepare metadata (same logic as before)
@@ -160,10 +156,7 @@ async function runIndexer() {
 
 					batchStockInfo.push({ id: stockId, metadata: metadata });
 				} catch (error) {
-					console.error(
-						`Error preparing stock ID ${stock?.id || "N/A"} for embedding:`,
-						error
-					);
+					console.error(`Error preparing stock ID ${stock?.id || "N/A"} for embedding:`, error);
 				}
 			} // End loop through pineconeBatch prep
 
