@@ -19,13 +19,13 @@ async function geminiSuggestions({ selectedStocks, retrievalResults, userPrompt 
 
 	const selectedStocksNames = selectedStocks.map((stock) => stock.name).join(", ");
 	const suggestedStocksNames = retrievalResults.map((stock) => stock.name).join(", ");
+	const stocksSector = [...new Set(selectedStocks.map((stock) => stock.sector))].join(", ");
+	const stocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))].join(", ");
 
 	const finalContent = userPrompt({
 		selectedInfo: selectedStocksNames,
 		suggestionsInfo: suggestedStocksNames,
 	});
-
-	console.log(`[LLM Service] User message: ${finalContent}`);
 
 	// --- 2. Call Gemini API ---
 	try {

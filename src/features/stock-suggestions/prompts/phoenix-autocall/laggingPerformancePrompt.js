@@ -1,34 +1,35 @@
-const systemPrompt = `You are a financial analyst assistant. Your task is to explain potential reasons why suggested stocks, despite being in a similar sector/industry to the selected stock, are currently exhibiting lagging performance (e.g., low 3-month returns or trading near their 52-week lows).`;
+const userPromptTemplate = ({ selectedInfo, suggestionsInfo }) => {
+	const promptText = `
+        **Objective:** Analyze the provided lists of stocks ([selectedStocks] and [suggestedStocks]) to identify underperformers within [suggestedStocks].
 
-const userPromptTemplate = ({
-	selectedInfo,
-	suggestionsInfo,
-	stocksName, // Name of the originally selected stock(s) for context
-	stocksSector,
-	stocksSubSectors,
-}) => {
-	return `
-        The user selected: ${selectedInfo} (Sectors: ${stocksSector}; Industry: ${stocksSubSectors}).
+        **Input:**
+        * [selectedStocks]: ${selectedInfo}
+        * [suggestedStocks]: ${suggestionsInfo}
 
-        Based on filtering criteria (similar sector/industry, 3-month performance in the lowest tier OR price near the lower end of its 52-week high/low range), the following stocks were suggested as potentially lagging performers:
-        ${suggestionsInfo}
+        **Task Breakdown:**
 
-        Instructions:
-        Choose up to 5 stocks from the suggestions.
-        Provide a brief explanation (1-2 sentences maximum per stock) suggesting potential reasons why this stock might be lagging in performance (e.g., low 3-month return or trading near its 52-week low) despite being in a similar sectors and/or industry as the selected stocks (${stocksName}).
-        Focus on potential company-specific factors, recent negative news or earnings misses, increased competition, specific sub-sector challenges affecting this stock more, poor recent execution, or negative market sentiment shifts impacting its valuation.
-        Do not give investment advice. Present the explanations clearly for each suggested stock.
-        
-        Use the example structure below for each stock suggestion.
+        1.  **Data Gathering (Crucial: Use Grounding/Web Search):**
+            * Utilize your web search capabilities extensively.
+            * Focus on potential company-specific factors, recent negative news or earnings misses, increased competition, specific sub-sector challenges affecting this stock more, poor recent execution, or negative market sentiment shifts impacting its valuation.
 
-        Example structure for one stock, in markdown format. Do NOT add a section header:
-        "**[Suggested Stock Name]**: Its recent lagging performance could be due to [brief potential reason, e.g., recent disappointing earnings results, increased competitive pressure in its main market, specific regulatory concerns, negative investor sentiment following a strategy shift, or sector headwinds disproportionately affecting its operations, etc.]."
+        2.  **Fundamental Comparison:**
+            * Compare the **performance and outlook** of each stock in [suggestedStocks] against the stocks in [selectedStocks]. Identify which [suggestedStocks] show demonstrably stronger results (e.g., higher growth rates, significant earnings beats, more optimistic guidance).
+            * Compare the **impact of recent corporate news**. Assess whether the news flow for stocks in [suggestedStocks] points towards a more positive fundamental trajectory (e.g., successful product launches, beneficial M&A) compared to those in [selectedStocks].
 
-        **Important:** Note how '[Suggested Stock Name]' is bold in the example. Ensure the actual stock name you provide in your response is also formatted in **bold** using Markdown.
-    `;
+        3.  **Selection & Justification:**
+            * Based *only* on the comparison of the grounded earnings data and corporate news, select **up to a maximum of 5 stocks** from the [suggestedStocks] list that exhibit clearly stronger fundamental characteristics or significantly better recent developments than the stocks in [selectedStocks].
+            * For **each** stock you select, provide a concise justification, 1-2 sentences, explaining *why* it has seen a lagging performance despite being in a similar sector/industry as the selected stocks. Reference specific data points or news events found via your web search. 
+
+        **Output Format:**
+        **[Suggested Stock Name]**: Brief justification summarizing the superior fundamental factors (based on recent earnings/news).
+
+        **Important:** The final answer should ONLY contain the output, which is the **up to 5 stocks** selected from the 'suggested stocks' and their justification. Do not include any additional commentary or explanations outside of the specified format. Do not include reference numbers like [1], [4, 9], etc. in the output.
+        **Important:** Your analysis and selection *must* be based on the information retrieved via grounding/web search regarding recent earnings and corporate news. Do not rely on pre-existing knowledge without verification. Ensure the timeframe for news is respected - last 6 months.
+        `;
+
+	return { role: "user", parts: [{ text: promptText }] };
 };
 
 module.exports = {
-	systemPrompt,
 	user: userPromptTemplate,
 };
