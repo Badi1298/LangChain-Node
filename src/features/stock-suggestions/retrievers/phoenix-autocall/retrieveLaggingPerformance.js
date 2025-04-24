@@ -63,11 +63,7 @@ async function retrieveLaggingPerformanceStocks({
 			fetchedVectors.push(record.values);
 		} else {
 			console.warn(`Vector for ID ${id} not found or fetchResponse structure unexpected.`);
-			// Decide how to handle missing vectors: error out, or continue with fewer?
-			// Option: Throw an error
-			// throw new Error(`Vector for ID ${id} not found.`);
-			// Option: Continue (average will be based on found vectors)
-			// continue;
+			throw new Error(`Vector for ID ${id} not found.`);
 		}
 	}
 

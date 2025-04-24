@@ -34,6 +34,7 @@ async function openAiSuggestions({ selectedStocks, retrievalResults, systemPromp
 	});
 
 	console.log(`[LLM Service] User message: ${userMessage}`);
+	// return;
 
 	// --- 2. Call OpenAI API ---
 	try {
