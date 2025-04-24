@@ -27,6 +27,9 @@ async function geminiSuggestions({ selectedStocks, retrievalResults, userPrompt 
 		suggestionsInfo: suggestedStocksNames,
 	});
 
+	console.log("[LLM Service] Final content for Gemini API:", finalContent);
+	// return;
+
 	// --- 2. Call Gemini API ---
 	try {
 		console.log(`[LLM Service] Requesting explanation from ${MODEL}...`);
