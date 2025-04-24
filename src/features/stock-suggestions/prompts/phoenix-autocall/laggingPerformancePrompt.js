@@ -26,6 +26,7 @@ const userPromptTemplate = ({ selectedInfo, suggestionsInfo }) => {
 
         **Important:** The final answer should ONLY contain the output, which is the **up to 5 stocks** selected from the 'suggested stocks' and their justification. Do not include any additional commentary or explanations outside of the specified format. Do not include reference numbers like [1], [4, 9], etc. in the output.
         **Important:** Your analysis and selection *must* be based on the information retrieved via grounding/web search regarding recent earnings and corporate news. Do not rely on pre-existing knowledge without verification. Ensure the timeframe for news is respected - last 6 months.
+        **Important:** Return only the suggestions, do not give an introduction like "Here are the suggested stocks...".
         `;
 
 	return { role: "user", parts: [{ text: promptText }] };

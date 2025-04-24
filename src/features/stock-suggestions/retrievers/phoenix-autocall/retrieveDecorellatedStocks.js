@@ -5,7 +5,7 @@
  *
  * @param {Array<object>} selectedStocks - Array of currently selected stock objects FROM API/FE.
  * @param {Pinecone.Index} pineconeIndex - Initialized Pinecone index object.
- * @param {number} [topK=10] - The maximum number of results to retrieve.
+ * @param {number} [topK=20] - The maximum number of results to retrieve.
  * @returns {Promise<Array<object>>} - Promise resolving to an array of retrieved stock metadata objects including their IDs.
  */
 async function retrieveDecorrelatedStocks({
