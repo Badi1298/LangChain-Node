@@ -16,13 +16,13 @@ const stockSuggestionConfigs = {
 			},
 		],
 		[ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DIFFERENT_SUB_SECTORS]: [
-			// {
-			// 	retriever: phoenixAutocallRetrievers.decorrelation,
-			// 	llmService: llms.openAiSuggestions,
-			// 	systemPrompt: phoenixAutocallPrompts.decorrelation.system,
-			// 	userPrompt: phoenixAutocallPrompts.decorrelation.user,
-			// 	sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DECORRELATION,
-			// },
+			{
+				retriever: phoenixAutocallRetrievers.decorrelation,
+				llmService: llms.openAiSuggestions,
+				systemPrompt: phoenixAutocallPrompts.decorrelation.system,
+				userPrompt: phoenixAutocallPrompts.decorrelation.user,
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DECORRELATION,
+			},
 			{
 				retriever: phoenixAutocallRetrievers.volatility,
 				llmService: llms.geminiSuggestions,
@@ -30,19 +30,19 @@ const stockSuggestionConfigs = {
 				userPrompt: phoenixAutocallPrompts.volatility.user,
 				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.LOW_VOLATILITY,
 			},
-			// {
-			// 	retriever: phoenixAutocallRetrievers.decorrelationToo,
-			// 	llmService: llms.openAiSuggestions,
-			// 	systemPrompt: phoenixAutocallPrompts.decorrelationToo.system,
-			// 	userPrompt: phoenixAutocallPrompts.decorrelationToo.user,
-			// 	sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DECORRELATION_TOO,
-			// },
-			// {
-			// 	retriever: phoenixAutocallRetrievers.laggingPerformance,
-			// 	llmService: llms.geminiSuggestions,
-			// 	userPrompt: phoenixAutocallPrompts.laggingPerformance.user,
-			// 	sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.LAGGING_PERFORMANCE,
-			// },
+			{
+				retriever: phoenixAutocallRetrievers.decorrelationToo,
+				llmService: llms.openAiSuggestions,
+				systemPrompt: phoenixAutocallPrompts.decorrelationToo.system,
+				userPrompt: phoenixAutocallPrompts.decorrelationToo.user,
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.DECORRELATION_TOO,
+			},
+			{
+				retriever: phoenixAutocallRetrievers.laggingPerformance,
+				llmService: llms.geminiSuggestions,
+				userPrompt: phoenixAutocallPrompts.laggingPerformance.user,
+				sectionTitle: ProductTypesSuggestionsMap.PHOENIX_AUTOCALL.LAGGING_PERFORMANCE,
+			},
 		],
 		selector: selectors.phoenixAutocallSelector,
 	},

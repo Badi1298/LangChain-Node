@@ -16,6 +16,8 @@ const userPromptTemplate = ({ selectedInfo, suggestionsInfo, stocksSector }) => 
         "**[Suggested Stock Name]**: Its **[Sector Name]** sector often reacts differently to **[Macro Event]** because [brief reason]."
 
         **Important:** Note how '[Suggested Stock Name]', '[Sector Name]' and '[Macro Event]' are bold in the example. Ensure that all are also formatted in **bold** using Markdown.
+        **Important:** Return only the suggestions, do not give an introduction like "Here are the suggested stocks...".
+
     `;
 };
 
