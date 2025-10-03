@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { createFile, vectoriseFile } = require("../services/openaiVectoriseFile");
 
 /**
  * Controller for handling PDF file uploads and parsing
@@ -34,26 +35,28 @@ const parsePdfController = {
 			const fileName = req.file.filename;
 			const originalName = req.file.originalname;
 
-			// TODO: Implement PDF parsing logic here
-			// This would typically involve:
-			// 1. Reading the PDF file using pdf-parse or similar library
-			// 2. Extracting text content
-			// 3. Processing with OpenAI/LangChain for structured data extraction
-			// 4. Returning parsed results
+			// Create file in OpenAI and vectorise it
+			console.log("Creating file in OpenAI...");
+			const fileId = await createFile(filePath);
+			console.log("File created with ID:", fileId);
 
-			// Placeholder response
+			console.log("Vectorising file...");
+			const vectoriseResult = await vectoriseFile(fileId);
+			console.log("Vectorise result:", JSON.stringify(vectoriseResult, null, 2));
+
+			// Return the vectorise result so you can see what it contains
 			res.status(200).json({
 				success: true,
-				message: "PDF uploaded successfully",
+				message: "PDF uploaded and vectorised successfully",
 				data: {
 					fileName,
 					originalName,
 					filePath,
 					fileSize: req.file.size,
 					uploadTime: new Date().toISOString(),
+					fileId,
+					vectoriseResult,
 				},
-				// TODO: Add parsed PDF content here
-				parsedContent: "PDF parsing implementation needed",
 			});
 		} catch (error) {
 			console.error("Error processing PDF:", error);

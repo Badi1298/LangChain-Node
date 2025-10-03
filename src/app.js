@@ -16,7 +16,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Routes
-app.use("/api/pdf", parsePdfRoutes);
+app.use("/api/ai", parsePdfRoutes);
 
 // Start the server
 app.listen(PORT, () => {

@@ -40,8 +40,6 @@ async function vectoriseFile(fileId) {
 		vector_store_id: vectorStore.id,
 	});
 
-	console.log(result);
-
 	return result;
 }
 
