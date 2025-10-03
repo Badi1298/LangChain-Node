@@ -18,19 +18,45 @@ async function openAiSuggestions({ selectedStocks, retrievalResults, systemPromp
 		return;
 	}
 
+	let allStocks = [];
+
+	// --- 0. Fetch Stock Data ---
+	try {
+		const response = await fetch("http://localhost:7018/api/open/autobots/get-list");
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
+		const data = await response.json();
+		allStocks = data;
+	} catch (error) {
+		console.error("Error fetching stock data:", error);
+		return [];
+	}
+
 	// --- 1. Prepare Context for Prompt ---
-	// Use the first selected stock for primary context
-	const stocksName = selectedStocks.map((stock) => stock.name).join(", ");
-	const stocksSector = [...new Set(selectedStocks.map((stock) => stock.sector))].join(", ");
-	const stocksSubSectors = [...new Set(selectedStocks.map((stock) => stock.sub_sector))].join(", ");
-	// const suggestedStocksName = retrievalResults.map((stock) => stock.name).join(", ");
+	const selectedStocksData = selectedStocks.map((stock) => ({
+		name: stock.name,
+		ticker: stock.ticker,
+		volatility_12: stock.volatility_6,
+	}));
+
+	const retrievedStocksData = retrievalResults.map((stock) => {
+		const stockDetails = allStocks.find((s) => s.ticker === stock);
+
+		if (stockDetails) {
+			return {
+				name: stockDetails.name,
+				ticker: stockDetails.ticker,
+				volatility_12: stockDetails.volatility_12,
+			};
+		}
+
+		return null; // Handle case where stock is not found
+	});
 
 	const userMessage = userPrompt({
-		selectedInfo: stocksName,
-		suggestionsInfo: JSON.stringify(retrievalResults, null, 2), // Format for better readability
-		stocksName,
-		stocksSector,
-		stocksSubSectors,
+		selectedInfo: JSON.stringify(selectedStocksData, null, 2),
+		suggestionsInfo: JSON.stringify(retrievedStocksData, null, 2),
 	});
 
 	console.log(`[LLM Service] User message: ${userMessage}`);
@@ -38,7 +64,7 @@ async function openAiSuggestions({ selectedStocks, retrievalResults, systemPromp
 
 	// --- 2. Call OpenAI API ---
 	try {
-		const chatModel = "gpt-4o-mini";
+		const chatModel = "gpt-4o";
 		console.log(`[LLM Service] Requesting explanation from ${chatModel}...`);
 
 		const response = await openai.chat.completions.create({

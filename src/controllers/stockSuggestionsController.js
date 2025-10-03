@@ -2,6 +2,7 @@ const { stockSuggestionConfigs } = require("../features/stock-suggestions/config
 const {
 	getRelevantStockSuggestions,
 } = require("../features/stock-suggestions/utils/getRelevantStockSuggestions.js");
+const { extractJsonFromString } = require("../features/stock-suggestions/helpers/extractJsonFromString.js");
 
 exports.computeStockSuggestions = async (req, res) => {
 	const { selectedStocks, productType } = req.body;
@@ -60,17 +61,21 @@ exports.computeStockSuggestions = async (req, res) => {
 				topK: 20,
 			});
 
+			// --- Step 1.1: Handle Retrieval Results ---
+			const parsedResults = extractJsonFromString(retrievalResults);
+			const parsedResultsArray = JSON.parse(parsedResults);
+
 			// --- Step 2: Generate Explanation (if stocks found) ---
 			let explanation = "No suitable decorrelated stocks found matching the criteria.";
-			if (retrievalResults.length > 0) {
+			if (parsedResultsArray.length > 0) {
 				console.log(
-					`[API Route] Generating explanation for ${retrievalResults.length} suggestions for ${sectionTitle}...`
+					`[API Route] Generating explanation for ${parsedResultsArray.length} suggestions for ${sectionTitle}...`
 				);
 
 				// Generate explanation using LLM
 				explanation = await llmService({
 					selectedStocks,
-					retrievalResults,
+					retrievalResults: parsedResultsArray,
 					systemPrompt,
 					userPrompt,
 				});

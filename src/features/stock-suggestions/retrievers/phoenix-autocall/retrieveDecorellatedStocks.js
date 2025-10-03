@@ -1,189 +1,97 @@
-const { shuffleArray } = require("../../helpers/shuffleArray.js");
-const { averageVectors } = require("../../helpers/averageVectors.js");
+const fs = require("fs");
+const path = require("path");
 
-/**
- * Retrieves stock suggestions based on finding decorrelated sectors within the same country
- * and a specific volatility range relative to selected stocks.
- * ADJUSTED for specific input structure and final sector list.
- *
- * @param {Array<object>} selectedStocks - Array of currently selected stock objects FROM API/FE.
- * @param {Pinecone.Index} pineconeIndex - Initialized Pinecone index object.
- * @param {number} [topK=20] - The maximum number of results to retrieve.
- * @returns {Promise<Array<object>>} - Promise resolving to an array of retrieved stock metadata objects including their IDs.
- */
-async function retrieveDecorrelatedStocks({
-	selectedStocks, // Input array with structure { id, country, sector, volatility_6, ... }
-	pineconeIndex,
-	vectorDimension, // Assuming this is passed in or available in the context
-	topK,
-}) {
+const openai = require("../../../../services/openaiClient.js");
+
+async function retrieveDecorrelatedStocks({ selectedStocks }) {
 	if (!selectedStocks || selectedStocks.length === 0) {
 		console.error("Retrieval Error: No selected stocks provided for context.");
 		return [];
 	}
-	if (typeof vectorDimension === "undefined") {
-		console.error("Retrieval Error: vectorDimension is not defined.");
-		return [];
-	}
 
-	// --- 1. Parse Context from selectedStocks ---
-	const referenceStock = selectedStocks[0]; // Use first stock for context
-	const referenceCountry = referenceStock?.country;
-	const referenceSectors = [...new Set(selectedStocks.map((s) => s.sector))];
-	// Ensure IDs are strings for comparison with Pinecone string IDs later
-	const selectedStockIDs = selectedStocks.map((s) => String(s.id));
+	const stockTickersPath = path.join(process.cwd(), "stock-tickers.json");
+	let stocksList;
 
-	if (!referenceCountry || referenceSectors.length === 0) {
-		console.error(
-			"[Retrieval] Error: Selected stock(s) missing 'country' or 'sector'. Received:",
-			referenceStock
-		);
-		return [];
-	}
-
-	console.log(
-		`[Retrieval] Context: Country='${referenceCountry}', Sector='${referenceSectors.join(", ")}'`
-	);
-
-	// Calculate volatility range using 'volatility_6' from the INPUT data
-	let minVolatility = Infinity;
-	let maxVolatility = -Infinity;
-	let validVolatilityCount = 0;
-	selectedStocks.forEach((stock) => {
-		const volatility = stock?.volatility_6;
-		if (volatility) {
-			minVolatility = Math.min(minVolatility, parseFloat(volatility));
-			maxVolatility = Math.max(maxVolatility, parseFloat(volatility));
-			validVolatilityCount++;
-		} else {
-			console.warn(
-				`[Retrieval] Input Stock ID ${stock.id} missing valid 'volatility_6'. Value: ${volatility}`
-			);
-		}
-	});
-
-	if (validVolatilityCount === 0) {
-		console.error(
-			"[Retrieval] Error: Could not determine valid volatility range from 'volatility_6' in selected stocks."
-		);
-		return [];
-	}
-
-	// Calculate target range based on the query logic (XX = min+4, YY = max+10)
-	let volatilityLowerBound = minVolatility + 4;
-	let volatilityUpperBound = maxVolatility + 10;
-	if (volatilityLowerBound > volatilityUpperBound) {
-		// Clamp if inverted
-		console.warn(
-			`[Retrieval] Calculated volatility bounds are inverted [${volatilityLowerBound}, ${volatilityUpperBound}]. Adjusting.`
-		);
-		// Example adjustment: use a fixed spread or swap bounds, clamping is simple
-		volatilityLowerBound = volatilityUpperBound - 6; // Maintain the 6 point spread, centered on upper? Adjust logic as needed.
-		// Or simply clamp: volatilityLowerBound = volatilityUpperBound;
-	}
-	console.log(
-		`[Retrieval] Calculated Target Volatility Range (using input volatility_6): [${volatilityLowerBound.toFixed(
-			4
-		)}, ${volatilityUpperBound.toFixed(4)}]`
-	);
-
-	// --- 2. Construct Pinecone Filter ---
-	const pineconeVolatilityFilterKey = "implied_volatility_12m";
-	console.log(
-		`[Retrieval] Filtering Pinecone metadata field: '${pineconeVolatilityFilterKey}' using calculated range.`
-	);
-
-	const filterCriteriaForPinecone = {
-		$and: [
-			{ country: { $eq: referenceCountry } },
-			// { sector: { $nin: referenceSectors } },
-			{
-				[pineconeVolatilityFilterKey]: {
-					$gte: volatilityLowerBound,
-					$lte: volatilityUpperBound,
-				},
-			},
-		],
-	};
-
-	// Fetch vectors for the given IDs
-	console.log(`Workspaceing vectors for IDs: ${selectedStockIDs.join(", ")}`);
-	const fetchResponse = await pineconeIndex.fetch(selectedStockIDs);
-
-	const fetchedVectors = [];
-	// Check response structure (depends slightly on client version, adjust if needed)
-	// For pinecone-database/pinecone v2+: response has a 'records' object
-	const records = fetchResponse.records || {}; // Adapt if structure differs
-	for (const id of selectedStockIDs) {
-		const record = records[id];
-		if (record && record.values) {
-			fetchedVectors.push(record.values);
-		} else {
-			console.warn(`Vector for ID ${id} not found or fetchResponse structure unexpected.`);
-			throw new Error(`Vector for ID ${id} not found.`);
-		}
-	}
-
-	if (fetchedVectors.length === 0) {
-		console.error("Could not retrieve any vectors for the given IDs.");
-		return null;
-	}
-
-	if (fetchedVectors.length < selectedStockIDs.length) {
-		console.warn(
-			`Only found vectors for ${fetchedVectors.length} out of ${selectedStockIDs.length} requested IDs.`
-		);
-	}
-
-	// Average the retrieved vectors
-	console.log(`Averaging ${fetchedVectors.length} vectors...`);
-	const averageQueryVector = averageVectors(fetchedVectors);
-	const negatedAverageQueryVector = averageQueryVector.map((v) => -v); // Negate the vector for performance retrieval
-
-	if (!averageQueryVector) {
-		console.error("Failed to compute average vector.");
-		return null;
-	}
-
-	// --- 4. Execute Pinecone Query ---
-	console.log("[Retrieval] Querying Pinecone with filter:", JSON.stringify(filterCriteriaForPinecone));
 	try {
-		const initialTopK = topK * 5 + selectedStocks.length; // Fetch more for post-filtering
+		const rawData = fs.readFileSync(stockTickersPath, "utf8");
+		stocksList = JSON.stringify(JSON.parse(rawData), null, 2);
+	} catch (err) {
+		console.error(`Error reading stock tickers file: ${err.message}`);
+		return "Failed to read stock tickers file.";
+	}
 
-		const queryResponse = await pineconeIndex.query({
-			vector: negatedAverageQueryVector,
-			filter: filterCriteriaForPinecone,
-			topK: initialTopK,
-			includeMetadata: true,
-			includeValues: false,
+	// --- 1. Prepare Context for Prompt ---
+	const selectedStocksData = selectedStocks.map((stock) => stock.ticker);
+
+	// --- 2. Prepare Prompt ---
+	const userMessage = `
+		Objective: Find approximately 100 stocks from a provided list of approximately 2500 that are from the
+		same country and from very decorrelated sectors compared to the 2-3 designated "seed" stocks.
+
+		Input Data:
+		I will provide you with a list containing approximately 2500 stocks tickers. 
+		I will also clearly identify 2-3 stocks from this list that you should use as the "seed" stocks for 
+		decorrelation comparison.
+
+		Your Task:
+		1. Identify the approximately 100 stocks from the provided list that are from the
+		same country and from very decorrelated sectors compared to to the "seed" stocks.
+		2. Do NOT include the "seed" stocks in your output.
+		3. Do NOT return back all the stock, choose approximately 100 stocks.
+		4. Provide the output in a JSON format that can be read in JS with JSON.parse with the following 
+		structure:
+		[ "AAPL", "MSFT", ... ]
+		5. Do not include any additional information or explanations in the output.
+
+		Seed Stocks - here are the stocks I already have selected, make your decorrelation analysis based on 
+		these stocks:
+		${JSON.stringify(selectedStocksData, null, 2)}
+
+		Stocks List - here is the list of 2500 stocks tickers to choose from:
+		${stocksList}
+	`;
+
+	// --- 3. Call OpenAI API ---
+	try {
+		const chatModel = "gpt-4o-mini";
+		console.log(`[LLM Service] Requesting explanation from ${chatModel}...`);
+
+		const response = await openai.chat.completions.create({
+			model: chatModel,
+			messages: [{ role: "user", content: userMessage }],
+			temperature: 0.5,
+			n: 1,
 		});
 
-		console.log(`[Retrieval] Pinecone returned ${queryResponse.matches?.length || 0} potential matches.`);
+		const explanation = response.choices[0]?.message?.content?.trim();
 
-		// --- 5. Process Results ---
-		if (!queryResponse.matches || queryResponse.matches.length === 0) {
-			return [];
+		if (explanation) {
+			console.log("[LLM Service] Explanation received.");
+			console.log("[LLM Service] Explanation:", explanation);
+			return explanation;
+		} else {
+			console.error("[LLM Service] Error: OpenAI response missing content.", response);
+			return "Failed to generate explanation from AI.";
 		}
-
-		const shuffledQueryResponse = shuffleArray(queryResponse.matches); // Shuffle the results for randomness
-		console.log(`[Retrieval] Shuffled ${shuffledQueryResponse.length} matches.`);
-
-		// Post-filter to remove the originally selected stocks (compare Pinecone string ID with input string IDs)
-		const retrievedStocks = shuffledQueryResponse
-			.filter((match) => !selectedStockIDs.includes(match.id))
-			.slice(0, topK) // Apply original topK limit
-			.map((match) => ({
-				id: match.id, // Keep Pinecone string ID
-				...match.metadata, // Spread the retrieved metadata
-			}));
-
-		console.log(`[Retrieval] Returning ${retrievedStocks.length} decorrelated stock suggestions.`);
-		return retrievedStocks;
 	} catch (error) {
-		console.error("[Retrieval] Error querying Pinecone:", error.message || error);
-		// Consider more specific error handling (e.g., check error.status for Pinecone errors)
-		return [];
+		console.error("[LLM Service] Error calling OpenAI API:", error);
+		// Consider checking error type (e.g., rate limit, auth) for specific messages
+		return `Error generating explanation: ${error.message || "Unknown API error"}`;
 	}
+
+	// --- 4. Parse Response ---
+	const responseText = response.choices[0].message.content;
+	const decorrelatedStocks = responseText
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0)
+		.map((line) => {
+			const [ticker, name] = line.split(":").map((part) => part.trim());
+			return { ticker, name };
+		});
+
+	// --- 5. Return Decorrelated Stocks ---
+	return decorrelatedStocks;
 }
 
 module.exports = { retrieveDecorrelatedStocks };
