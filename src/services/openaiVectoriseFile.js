@@ -29,16 +29,29 @@ async function createFile(filePath) {
 
 async function vectoriseFile(fileId) {
 	const vectorStore = await openai.vectorStores.create({
-		name: "knowledge_base",
+		name: "precomplete",
 	});
 
+	// Debug the full vectorStore object structure
+	console.log("Full vectorStore object:", JSON.stringify(vectorStore, null, 2));
+	console.log("vectorStore.id:", vectorStore.id);
+	console.log("Type of vectorStore.id:", typeof vectorStore.id);
+
+	// Ensure we have a valid ID before proceeding
+	if (!vectorStore.id || typeof vectorStore.id !== "string") {
+		throw new Error("Invalid vector store ID received from OpenAI");
+	}
+
+	console.log("Adding file to vector store with ID:", vectorStore.id);
 	await openai.vectorStores.files.create(vectorStore.id, {
 		file_id: fileId,
 	});
 
-	const result = await openai.vectorStores.files.list({
-		vector_store_id: vectorStore.id,
-	});
+	console.log("Listing files in vector store with ID:", vectorStore.id);
+
+	const result = await openai.vectorStores.files.list(vectorStore.id);
+
+	console.log("Files in vector store with ID:", vectorStore.id);
 
 	return result;
 }
