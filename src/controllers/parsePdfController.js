@@ -130,7 +130,7 @@ const parsePdfController = {
 					filePath: filePath,
 					fileId: fileId,
 					vectorStoreId: vectorStoreId,
-					response: response.output_text,
+					output_text: response.output_text,
 				},
 			});
 		} catch (error) {
