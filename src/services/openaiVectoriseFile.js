@@ -1,7 +1,6 @@
 const fs = require("fs");
-const { OpenAI } = require("openai");
 
-const openai = new OpenAI();
+const openaiInstance = require("./openaiClient");
 
 async function createFile(filePath) {
 	let result;
@@ -12,14 +11,14 @@ async function createFile(filePath) {
 		const urlParts = filePath.split("/");
 		const fileName = urlParts[urlParts.length - 1];
 		const file = new File([buffer], fileName);
-		result = await openai.files.create({
+		result = await openaiInstance.files.create({
 			file: file,
 			purpose: "assistants",
 		});
 	} else {
 		// Handle local file path
 		const fileContent = fs.createReadStream(filePath);
-		result = await openai.files.create({
+		result = await openaiInstance.files.create({
 			file: fileContent,
 			purpose: "assistants",
 		});
@@ -28,32 +27,22 @@ async function createFile(filePath) {
 }
 
 async function vectoriseFile(fileId) {
-	const vectorStore = await openai.vectorStores.create({
+	const vectorStore = await openaiInstance.vectorStores.create({
 		name: "precomplete",
 	});
-
-	// Debug the full vectorStore object structure
-	console.log("Full vectorStore object:", JSON.stringify(vectorStore, null, 2));
-	console.log("vectorStore.id:", vectorStore.id);
-	console.log("Type of vectorStore.id:", typeof vectorStore.id);
 
 	// Ensure we have a valid ID before proceeding
 	if (!vectorStore.id || typeof vectorStore.id !== "string") {
 		throw new Error("Invalid vector store ID received from OpenAI");
 	}
 
-	console.log("Adding file to vector store with ID:", vectorStore.id);
-	await openai.vectorStores.files.create(vectorStore.id, {
+	await openaiInstance.vectorStores.files.create(vectorStore.id, {
 		file_id: fileId,
 	});
 
-	console.log("Listing files in vector store with ID:", vectorStore.id);
+	await openaiInstance.vectorStores.files.list(vectorStore.id);
 
-	const result = await openai.vectorStores.files.list(vectorStore.id);
-
-	console.log("Files in vector store with ID:", vectorStore.id);
-
-	return result;
+	return vectorStore.id;
 }
 
 module.exports = { createFile, vectoriseFile };
