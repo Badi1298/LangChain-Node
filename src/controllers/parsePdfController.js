@@ -47,72 +47,119 @@ const parsePdfController = {
 			const response = await openaiInstance.responses.create({
 				model: "gpt-5-mini",
 				input: `
-				Can you complete the required information below, and keep the exact formatting (just replace the "xxx", and don't re-write the instruction between brackets for every field).
+				Your entire response must be a single, valid JSON object. Do not add any explanatory text, notes, or markdown formatting before or after the JSON.
 
-				Only take the information from the PDF document (don't guess, and don't take information from anywhere else, even if the information seems wrong to you).
+				Use the following definitions to find and extract the required information from the provided PDF document. Do not guess or use external information.
 
 				All date formats must be dd.mm.yyyy, like 28.10.2015
 
-				
+				If a piece of information cannot be found in the document, use null as the value in the final JSON.
 
-				ISIN: xxx
+				Field Definitions:
 
-				Does the product quote in "Notional" or "Units": xxx
+				ISIN: null
 
-				Issuer: xxx
+				Does the product quote in "Notional" or "Units": null
 
-				Guarantor: xxx
+				Issuer: null
 
-				Currency: xxx
+				Guarantor: null
 
-				Initial Fixing Date (Also called "Trade Date" or "Strike Date", it's the date when the fixing of the underlyings occurred): xxx
+				Currency: null
 
-				Valuation Date (also called "issue date", it's when the settlement occurs, generally 1 or 2 weeks after Initial Fixing Date): xxx
+				Initial Fixing Date (Also called "Trade Date" or "Strike Date", it's the date when the fixing of the underlyings occurred): null
 
-				Final Fixing Date (also called "valuation date", it's the date when we observe the final levels of the underlyings on the closing): xxx
+				Valuation Date (also called "issue date", it's when the settlement occurs, generally 1 or 2 weeks after Initial Fixing Date): null
 
-				Maturity Date (also called "redemption date", it's when the settlement occurs to end the product, so it's 1 or 2 weeks after the Final Fixing Date generally): xxx
+				Final Fixing Date (also called "valuation date", it's the date when we observe the final levels of the underlyings on the closing): null
 
-				Maturity in Months (round to closest integer. Maturity is the difference between the Initial Fixing Date and Final Fixing Date. Only an integer number e.g. 12, 18, ...): xxx
+				Maturity Date (also called "redemption date", it's when the settlement occurs to end the product, so it's 1 or 2 weeks after the Final Fixing Date generally): null
 
-				Observations Frequency (monthly, quarterly, semi-annually, annually or other): xxx
+				Maturity in Months (round to closest integer. Maturity is the difference between the Initial Fixing Date and Final Fixing Date. Only an integer number e.g. 12, 18, ...): null
 
-				Coupon Barrier (in %): xxx
+				Observations Frequency (monthly, quarterly, semi-annually, annually or other): null
 
-				Coupon Level (per period): xxx
+				Coupon Barrier (as a number, e.g., for 70%, use 70): null
 
-				Coupon Level (per annum): xxx
+				Coupon Level (per period): null
 
-				Memory Effect on the Coupon (i.e. will all the possibly missed coupons be paid when a coupon is paid? Yes or No): xxx
+				Coupon Level (per annum): null
 
-				Non-Call period (number of observed periods where the product can NOT be ealry redeemed, we just observe the coupon. Integer number, 1, 2, 3, etc.): xxx
+				Memory Effect on the Coupon (i.e. will all the possibly missed coupons be paid when a coupon is paid? true or false): null
 
-				Autocall Trigger ("Fix" or "Stepdown". Autocall Trigger is the level above which all underlyings must close on an observation date for the product to be early redeemed. Fix means it's always the same level. Stepdown is when the level decreases on each observation): xxx
+				Non-Call period (number of observed periods where the product can NOT be ealry redeemed, we just observe the coupon. Integer number, 1, 2, 3, etc.): null
 
-				Capital Protection Level (in %. If at least one stock decreases below this level then the capital is impacted): xxx
+				Autocall Trigger ("Fix" or "Stepdown". Autocall Trigger is the level above which all underlyings must close on an observation date for the product to be early redeemed. Fix means it's always the same level. Stepdown is when the level decreases on each observation): null
 
-				Protection Type (it's "Low Strike", "European Barrier", "American Barrier" or "Daily close barrier". Low Strike is when the loss begins from another level than the Initial Fixing Level of the worst performing underlying. European Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation at Maturity. American barrier is when the barrier observation is continuous during the product lifetime. Daily close is as american barrier but we don't observe all trading levels, only the closing levels, during the product lifetime. We can have both one of the 3 barriers AND a low strike, meaning the observation on the underlying level is from a certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, in this case the Protection Type is NOT low strike, it's one of the 3 barriers): xxx
+				Capital Protection Level (as a number. If at least one stock decreases below this level then the capital is impacted): null
 
-				Do we have both a Low Strike and a Barrier ? (yes/no): xxx
+				Protection Type (it's "Low Strike", "European Barrier", "American Barrier" or "Daily close barrier". Low Strike is when the loss begins from another level than the Initial Fixing Level of the worst performing underlying. European Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation at Maturity. American barrier is when the barrier observation is continuous during the product lifetime. Daily close is as american barrier but we don't observe all trading levels, only the closing levels, during the product lifetime. We can have both one of the 3 barriers AND a low strike, meaning the observation on the underlying level is from a certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, in this case the Protection Type is NOT low strike, it's one of the 3 barriers): null
 
-				If we have both a Low Strike and a Barrier, what is the Low Strike Level (in %): xxx
+				Do we have both a Low Strike and a Barrier ? (true / false): null
 
-				Redemption Type (Cash/Physical. If you see “Cash and Physical” or similar wording, then it’s Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario): xxx
+				If we have both a Low Strike and a Barrier, what is the Low Strike Level (as a number): null
+
+				Redemption Type (Cash/Physical. If you see “Cash and Physical” or similar wording, then it’s Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario): null
 
 				List of all Underlyings (it's possible that there's only 1. Put only Ticker + Initial Fixing. For instance: AAPL US ; 304.24)
 
-				Asset Class (Equity, Index, Credit, Commodities, FX, Rates or Mixed. Not that if you think the underlying is and index or ETF containing stocks and you have other underlyings being stocks, you can put "Equity". Else it's Mixed.): xxx
+				Asset Class (Equity, Index, Credit, Commodities, FX, Rates or Mixed. Not that if you think the underlying is and index or ETF containing stocks and you have other underlyings being stocks, you can put "Equity". Else it's Mixed.): null
 
-				Valoren/Common code: xxx
+				Valoren/Common code: null
 
-				Denomination (integer, number): xxx
+				Denomination (integer, number): null
 
-				Issue Price (number, can be % if it quote si Notional or not if it's in Units): xxx
+				Issue Price (number, can be % if it quote si Notional or not if it's in Units): null
 
-				Minimum Trading Size: xxx
+				Minimum Trading Size: null
 
-				Please create a table represented as a JSON object with all intermediary observation dates, with 4 columns (Observation Date, Payment Date, Autocall Trigger level for said observation date in format "100%" "85%" etc not "0%" "-15", "Coupon" or "Autocall+Coupon" if on the said observation date we observe only the coupon or also the early redemption)
-				
+				Please create a table with all intermediary observation dates, with 4 columns (Observation Date, Payment Date, Autocall Trigger level for said observation date in format "100%" "85%" etc not "0%" "-15", "Coupon" or "Autocall+Coupon" if on the said observation date we observe only the coupon or also the early redemption)
+
+				Now, using the information you've extracted based on the definitions above, complete the following JSON structure.
+
+				{
+					"isin": null,
+					"quoteType": null,
+					"issuer": null,
+					"guarantor": null,
+					"currency": null,
+					"initialFixingDate": null,
+					"valuationDate": null,
+					"finalFixingDate": null,
+					"maturityDate": null,
+					"maturityInMonths": null,
+					"observationsFrequency": null,
+					"couponBarrierPercentage": null,
+					"couponLevelPerPeriod": null,
+					"couponLevelPerAnnum": null,
+					"hasMemoryEffect": null,
+					"nonCallPeriods": null,
+					"autocallTriggerType": null,
+					"capitalProtectionPercentage": null,
+					"protectionType": null,
+					"hasLowStrikeAndBarrier": null,
+					"lowStrikeLevelPercentage": null,
+					"redemptionType": null,
+					"underlyings": [
+						{
+							"ticker": null,
+							"initialFixing": null
+						}
+					],
+					"assetClass": null,
+					"valorenOrCommonCode": null,
+					"denomination": null,
+					"issuePrice": null,
+					"minimumTradingSize": null,
+					"observationSchedule": [
+						{
+							"observationDate": null,
+							"paymentDate": null,
+							"autocallTriggerLevel": null,
+							"observationType": null
+						}
+					]
+				}
 				`,
 				tools: [
 					{
