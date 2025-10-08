@@ -81,9 +81,9 @@ const parsePdfController = {
 
 				Coupon Barrier (as a number, e.g., for 70%, use 70): null
 
-				Coupon Level (per period): null
+				Coupon Level (per period, as a number): null
 
-				Coupon Level (per annum): null
+				Coupon Level (per annum, as a number): null
 
 				Memory Effect on the Coupon (i.e. will all the possibly missed coupons be paid when a coupon is paid? true or false): null
 
@@ -101,11 +101,11 @@ const parsePdfController = {
 
 				Redemption Type (Cash/Physical. If you see “Cash and Physical” or similar wording, then it’s Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario): null
 
-				List of all Underlyings (it's possible that there's only 1. Put only Ticker + Initial Fixing. For instance: AAPL US ; 304.24)
+				List of all Underlyings (it's possible that there's only 1. Put only Ticker + Initial Fixing. For instance: AAPL US ; 304.24). If an Underlying has an initial fixing in GBP or GBp, you need to consider the initial fixing in GBp (so in pence). Example: if Rolls Royce has a fixing of 11.68 GBP, you must consider the initial fixing to be 1168 (because 1 GBP = 100 GBp)
 
 				Asset Class (Equity, Index, Credit, Commodities, FX, Rates or Mixed. Not that if you think the underlying is and index or ETF containing stocks and you have other underlyings being stocks, you can put "Equity". Else it's Mixed.): null
 
-				Valoren/Common code: null
+				Valoren/Common code (string): null
 
 				Denomination (integer, number): null
 
@@ -113,7 +113,19 @@ const parsePdfController = {
 
 				Minimum Trading Size: null
 
-				Please create a table with all intermediary observation dates, with 4 columns (Observation Date, Payment Date, Autocall Trigger level for said observation date in format "100%" "85%" etc not "0%" "-15", "Coupon" or "Autocall+Coupon" if on the said observation date we observe only the coupon or also the early redemption)
+				Please create a table with all intermediary observation dates, with 4 columns 
+				(Observation Date, Payment Date, Autocall Trigger level for said observation date 
+				in format "100%" "85%" etc not "0%" "-15", "Coupon" or "Autocall+Coupon" if on the said 
+				observation date we observe only the coupon or also the early redemption). 
+				The very last event you'll create is the Maturity. For this one you must force an 
+				Autocall Trigger Level, which level is equal to : i) if Autocall Trigger is Fix, 
+				then the Autocall Trigger Level ii) if Stepdown, then the last level is either 
+				explicitely put in the termsheet for this date, else, a) if the stepdown is a 
+				sequence from observation to observation (e.g. all autocall triggers are 5% lower)
+				please continue the sequence for this last Autocall Trigger while talking into 
+				account a floor level equal to the Capital Protection Level (the lowest between 
+				the Barrier or the Low Strike, if any), else b) if it's not a sequence, then put 
+				the level of the last Autocall Trigger
 
 				Now, using the information you've extracted based on the definitions above, complete the following JSON structure.
 
@@ -147,7 +159,7 @@ const parsePdfController = {
 						}
 					],
 					"assetClass": null,
-					"valorenOrCommonCode": null,
+					"valoren": null,
 					"denomination": null,
 					"issuePrice": null,
 					"minimumTradingSize": null,
