@@ -63,8 +63,6 @@ const parsePdfController = {
 
 				Issuer: null
 
-				Guarantor: null
-
 				Currency: null
 
 				Initial Fixing Date (Also called "Trade Date" or "Strike Date", it's the date when the fixing of the underlyings occurred): null
@@ -82,8 +80,6 @@ const parsePdfController = {
 				Coupon Barrier (as a number, e.g., for 70%, use 70): null
 
 				Coupon Level (per period, as a number): null
-
-				Coupon Level (per annum, as a number): null
 
 				Memory Effect on the Coupon (i.e. will all the possibly missed coupons be paid when a coupon is paid? true or false): null
 
@@ -111,7 +107,7 @@ const parsePdfController = {
 
 				Issue Price (number, can be % if it quote si Notional or not if it's in Units): null
 
-				Minimum Trading Size: null
+				Minimum Trading Size (if no information about minumum trading size, then use denomination for this value as well): null
 
 				Please create a table with all intermediary observation dates, with 4 columns 
 				(Observation Date, Payment Date, Autocall Trigger level for said observation date 
@@ -143,7 +139,6 @@ const parsePdfController = {
 					"observationsFrequency": null,
 					"couponBarrierPercentage": null,
 					"couponLevelPerPeriod": null,
-					"couponLevelPerAnnum": null,
 					"hasMemoryEffect": null,
 					"nonCallPeriods": null,
 					"autocallTriggerType": null,
