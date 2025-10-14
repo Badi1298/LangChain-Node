@@ -75,7 +75,7 @@ const parsePdfController = {
 
 				Maturity in Months (round to closest integer. Maturity is the difference between the Initial Fixing Date and Final Fixing Date. Only an integer number e.g. 12, 18, ...): null
 
-				Observations Frequency (monthly, quarterly, semi-annually, annually or other): null
+				Observations Frequency (monthly, quarterly, semi_annually, annually or other): null
 
 				Coupon Barrier (as a number, e.g., for 70%, use 70): null
 
@@ -111,7 +111,7 @@ const parsePdfController = {
 
 				Please create a table with all intermediary observation dates, with 4 columns 
 				(Observation Date, Payment Date, Autocall Trigger level for said observation date 
-				in format "100%" "85%" etc not "0%" "-15", "Coupon" or "Autocall+Coupon" if on the said 
+				in number format 100, 85, etc., not 0, -15, "Coupon" or "Autocall+Coupon" if on the said 
 				observation date we observe only the coupon or also the early redemption). 
 				The very last event you'll create is the Maturity. For this one you must force an 
 				Autocall Trigger Level, which level is equal to : i) if Autocall Trigger is Fix, 
@@ -129,7 +129,6 @@ const parsePdfController = {
 					"isin": null,
 					"quoteType": null,
 					"issuer": null,
-					"guarantor": null,
 					"currency": null,
 					"initialFixingDate": null,
 					"valuationDate": null,
