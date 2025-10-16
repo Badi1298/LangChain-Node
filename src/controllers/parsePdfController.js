@@ -95,9 +95,9 @@ const parsePdfController = {
 
 				If we have both a Low Strike and a Barrier, what is the Low Strike Level (as a number): null
 
-				Redemption Type (Cash/Physical. If you see “Cash and Physical” or similar wording, then it’s Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario): null
+				Redemption Type (Cash/Physical. If you see “Cash and Physical” or similar wording, then it's Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario): null
 
-				List of all Underlyings (it's possible that there's only 1. Put only Ticker + Initial Fixing. For instance: AAPL US ; 304.24). If an Underlying has an initial fixing in GBP or GBp, you need to consider the initial fixing in GBp (so in pence). Example: if Rolls Royce has a fixing of 11.68 GBP, you must consider the initial fixing to be 1168 (because 1 GBP = 100 GBp)
+				List of all Underlyings (it's possible that there's only 1. Put only Ticker + Initial Fixing. For instance: AAPL US ; 304.24. Please make sure to always return the full ticker - example: "AAPL US", "NVDA UW" - not just "AAPL", "NVDA"). If an Underlying has an initial fixing in GBP or GBp, you need to consider the initial fixing in GBp (so in pence). Example: if Rolls Royce has a fixing of 11.68 GBP, you must consider the initial fixing to be 1168 (because 1 GBP = 100 GBp)
 
 				Asset Class (Equity, Index, Credit, Commodities, FX, Rates or Mixed. Not that if you think the underlying is and index or ETF containing stocks and you have other underlyings being stocks, you can put "Equity". Else it's Mixed.): null
 
