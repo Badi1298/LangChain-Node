@@ -12,7 +12,7 @@ const parsePdfSectionsController = {
 			}
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-4",
+				model: "gpt-5",
 				input: `
           Your entire response must be a single, valid JSON object. Do not add any explanatory text, notes, or markdown formatting before or after the JSON.
           Use the following definitions to find and extract the required information from the provided PDF document. Do not guess or use external information.
@@ -65,7 +65,7 @@ const parsePdfSectionsController = {
 			}
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-4",
+				model: "gpt-5",
 				input: `
           Your entire response must be a single, valid JSON object. Do not add any explanatory text, notes, or markdown formatting before or after the JSON.
           Use the following definitions to find and extract the required information from the provided PDF document. Do not guess or use external information.
@@ -153,7 +153,7 @@ const parsePdfSectionsController = {
 			}
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-4",
+				model: "gpt-5",
 				input: `
           Your entire response must be a single, valid JSON object. Do not add any explanatory text, notes, or markdown formatting before or after the JSON.
           Use the following definitions to find and extract the required information from the provided PDF document. Do not guess or use external information.
@@ -205,7 +205,7 @@ const parsePdfSectionsController = {
 			}
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-4",
+				model: "gpt-5",
 				input: `
           Your entire response must be a single, valid JSON object. Do not add any explanatory text, notes, or markdown formatting before or after the JSON.
           Use the following definitions to find and extract the required information from the provided PDF document. Do not guess or use external information.
