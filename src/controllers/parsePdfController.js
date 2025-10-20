@@ -38,14 +38,26 @@ const parsePdfController = {
 
 			// Create file in OpenAI and vectorise it
 			console.log("Creating file in OpenAI...");
+			let startTime = performance.now();
 			const fileId = await createFile(filePath);
-			console.log("File created with ID:", fileId);
+			let endTime = performance.now();
+			console.log(`File created with ID: ${fileId}. Time taken: ${endTime - startTime}ms`);
 
 			console.log("Vectorising file...");
+			startTime = performance.now();
 			const vectorStoreId = await vectoriseFile(fileId);
+			endTime = performance.now();
+			console.log(
+				`File vectorised. Vector store ID: ${vectorStoreId}. Time taken: ${
+					endTime - startTime
+				}ms`
+			);
+
+			console.log("Getting response from OpenAI...");
+			startTime = performance.now();
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-5-mini",
+				model: "gpt-5",
 				input: `
 				Your entire response must be a single, valid JSON object. Do not add any explanatory text, notes, or markdown formatting before or after the JSON.
 
@@ -174,6 +186,11 @@ const parsePdfController = {
 					},
 				],
 			});
+			endTime = performance.now();
+			console.log(`Got response from OpenAI. Time taken: ${endTime - startTime}ms`);
+
+			const overallEndTime = performance.now();
+			console.log(`Total time taken: ${overallEndTime - startTime}ms`);
 
 			res.status(200).json({
 				success: true,

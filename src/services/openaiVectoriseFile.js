@@ -27,20 +27,29 @@ async function createFile(filePath) {
 }
 
 async function vectoriseFile(fileId) {
+	let startTime = performance.now();
 	const vectorStore = await openaiInstance.vectorStores.create({
 		name: "precomplete",
 	});
+	let endTime = performance.now();
+	console.log(`Vector store created. Time taken: ${endTime - startTime}ms`);
 
 	// Ensure we have a valid ID before proceeding
 	if (!vectorStore.id || typeof vectorStore.id !== "string") {
 		throw new Error("Invalid vector store ID received from OpenAI");
 	}
 
+	startTime = performance.now();
 	await openaiInstance.vectorStores.files.create(vectorStore.id, {
 		file_id: fileId,
 	});
+	endTime = performance.now();
+	console.log(`File added to vector store. Time taken: ${endTime - startTime}ms`);
 
+	startTime = performance.now();
 	await openaiInstance.vectorStores.files.list(vectorStore.id);
+	endTime = performance.now();
+	console.log(`File list retrieved from vector store. Time taken: ${endTime - startTime}ms`);
 
 	return vectorStore.id;
 }
