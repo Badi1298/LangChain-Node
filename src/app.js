@@ -2,6 +2,7 @@ const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
 const parsePdfRoutes = require("./routes/parsePdfRoutes");
+const parsePdfSectionsRoutes = require("./routes/parsePdfSectionsRoutes");
 
 // Create an Express app
 const app = express();
@@ -17,6 +18,7 @@ app.use(cors());
 
 // Routes
 app.use("/api/ai", parsePdfRoutes);
+app.use("/api/v1/pdf-sections", parsePdfSectionsRoutes);
 
 // Start the server
 app.listen(PORT, () => {
