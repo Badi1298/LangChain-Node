@@ -1,6 +1,80 @@
+const fs = require("fs");
 const openaiInstance = require("../services/openaiClient");
+const { createFile, vectoriseFile } = require("../services/openaiVectoriseFile");
 
 const parsePdfSectionsController = {
+	vectorialisePdf: async (req, res) => {
+		try {
+			// Check if file was uploaded
+			if (!req.file) {
+				return res.status(400).json({
+					success: false,
+					error: "No file uploaded. Please provide a PDF file.",
+				});
+			}
+
+			// Check if uploaded file is a PDF
+			if (req.file.mimetype !== "application/pdf") {
+				// Clean up the uploaded file if it's not a PDF
+				fs.unlinkSync(req.file.path);
+				return res.status(400).json({
+					success: false,
+					error: "Invalid file type. Please upload a PDF file.",
+				});
+			}
+
+			const filePath = req.file.path;
+			const originalName = req.file.originalname;
+
+			// Create file in OpenAI and vectorise it
+			console.log("Creating file in OpenAI...");
+			let startTime = performance.now();
+			const fileId = await createFile(filePath);
+			let endTime = performance.now();
+			console.log(`File created with ID: ${fileId}. Time taken: ${endTime - startTime}ms`);
+
+			console.log("Vectorising file...");
+			startTime = performance.now();
+			const vectorStoreId = await vectoriseFile(fileId);
+			endTime = performance.now();
+			console.log(
+				`File vectorised. Vector store ID: ${vectorStoreId}. Time taken: ${
+					endTime - startTime
+				}ms`
+			);
+
+			const overallEndTime = performance.now();
+			console.log(`Total time taken: ${overallEndTime - startTime}ms`);
+
+			res.status(200).json({
+				success: true,
+				message: "PDF file processed and vectorised successfully",
+				data: {
+					fileName: originalName,
+					filePath: filePath,
+					fileId: fileId,
+					vectorStoreId,
+				},
+			});
+		} catch (error) {
+			console.error("Error processing PDF:", error);
+
+			// Clean up uploaded file in case of error
+			if (req.file && req.file.path) {
+				try {
+					fs.unlinkSync(req.file.path);
+				} catch (cleanupError) {
+					console.error("Error cleaning up file:", cleanupError);
+				}
+			}
+
+			res.status(500).json({
+				success: false,
+				error: "Internal server error while processing PDF",
+			});
+		}
+	},
+
 	getOverview: async (req, res) => {
 		try {
 			const { vectorStoreId } = req.body;
@@ -12,7 +86,7 @@ const parsePdfSectionsController = {
 			}
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-5",
+				model: "gpt-5-mini",
 				input: `
           Your entire response must be a single, valid JSON object. Do not add any explanatory text, notes, or markdown formatting before or after the JSON.
           Use the following definitions to find and extract the required information from the provided PDF document. Do not guess or use external information.
