@@ -100,7 +100,8 @@ const initializeRagChain = async (pdfPath, parseTables = false) => {
 	const customTemplate = `You are a financial expert. Given the following context from the document, 
     please answer the question as accurately and concisely as possible. 
     Return only the requested information, do not include any additional explanations or context. 
-    If the information is not directly found in the context, do not use any prior knowledge and respond with null.
+    If the information is not directly found in the context, do not guess, do not use any external 
+    information, do not use any prior knowledge. Just respond with null.
 
     Context: {context}
 
