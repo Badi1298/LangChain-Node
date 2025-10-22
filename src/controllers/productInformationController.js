@@ -4,10 +4,7 @@ const fs = require("fs").promises; // Using fs promises to delete files asynchro
 const { initializeRagChain } = require("../services/initializeRagChain");
 const queries = require("../utils/queries/productInformationQueries");
 
-const {
-	getIssuer,
-	isNotional,
-} = require("../services/product-information/parseProductInformation");
+const { getIssuer } = require("../services/product-information/parseProductInformation");
 
 /**
  * Parses product information from an uploaded PDF file and extracts details like
@@ -52,7 +49,7 @@ exports.parseProductInformationTermsheet = async (req, res) => {
 		let result = {
 			issuer: getIssuer(issuerData).id, // Extract the issuer ID.
 			issuer_code: getIssuer(issuerData).issuer_code, // Extract the issuer code.
-			notional: isNotional(notional), // Validate and extract the notional value.
+			notional, // Validate and extract the notional value.
 			isin, // International Securities Identification Number (ISIN).
 			currency, // Currency information.
 		};
