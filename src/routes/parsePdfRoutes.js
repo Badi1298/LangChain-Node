@@ -6,15 +6,15 @@ const productDetailsController = require("../controllers/productDetailsControlle
 const productInformationController = require("../controllers/productInformationController");
 
 router.post(
-  "/parse-product-information-termsheet",
-  upload.single("pdf"),
-  productInformationController.parseProductInformationTermsheet
+	"/parse-product-information-termsheet",
+	upload.single("pdf"),
+	productInformationController.parseProductInformationTermsheet
 );
 
 router.post(
-  "/parse-product-details-termsheet",
-  upload.single("pdf"),
-  productDetailsController.parseProductDetailsTermsheet
+	"/parse-product-details-termsheet",
+	upload.single("pdf"),
+	productDetailsController.parseProductDetailsTermsheet
 );
 
 module.exports = router;

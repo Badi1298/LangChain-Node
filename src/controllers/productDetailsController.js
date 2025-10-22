@@ -37,7 +37,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 		const pdfPath = path.join(process.cwd(), req.file.path);
 
 		// Initialize the Retrieval-Augmented Generation (RAG) chain to process the PDF.
-		const runnableRagChain = await initializeRagChain(pdfPath, true);
+		const runnableRagChain = await initializeRagChain(pdfPath);
 
 		const queries = queryMap[issuerId][categoryId]; // Get the queries for issuer 9 and product type 9
 
@@ -51,33 +51,10 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 			return acc;
 		}, {});
 
-		console.log(ragResults);
-
-		const flags = {
-			isLowStrike: isActiveFlag(ragResults.isLowStrike),
-		};
-
-		const underlyingsData = {
-			underlyings: parseUnderlyings(ragResults.underlyings),
-			initialFixings: parseInitialFixings(ragResults.initialFixings),
-		};
-
-		const prefillPanel = buildPrefillPanel(categoryId, ragResults);
-
-		const events = {
-			type: ragResults.eventsType,
-			events: ragResults.events,
-		};
-
-		// Perform additional checks on barrier conditions related to the product.
-		await checkBarrierConditions(flags, runnableRagChain);
-
 		// Send the extracted data back to the client as a successful JSON response.
 		res.json({
-			flags,
-			prefillPanel,
-			underlyings: underlyingsData,
-			valoren: ragResults.valoren,
+			success: true,
+			data: ragResults,
 		});
 	} catch (error) {
 		// Log the error details in the server console.

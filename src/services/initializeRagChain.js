@@ -69,8 +69,8 @@ const initializeRagChain = async (pdfPath, parseTables = false) => {
 
 	// Split the parsed PDF text into smaller chunks for processing
 	const splitter = new RecursiveCharacterTextSplitter({
-		chunkSize: 2000, // Each chunk will be 1000 characters long
-		chunkOverlap: 400, // Overlap 200 characters between chunks to preserve context
+		chunkSize: 1000, // Each chunk will be 1000 characters long
+		chunkOverlap: 200, // Overlap 200 characters between chunks to preserve context
 	});
 	const allSplits = await splitter.splitDocuments(loadedDocs);
 
@@ -85,12 +85,6 @@ const initializeRagChain = async (pdfPath, parseTables = false) => {
 		k: 6, // Return the top 6 most similar chunks
 		searchType: "similarity", // Search based on similarity
 	});
-
-	// const data = await vectorStoreRetriever.invoke(
-	//   "The difference in days between the Initial Fixing Date and the Final Fixing Date. Display only the number, so for example if the difference is 180, just say 180."
-	// );
-
-	// console.log(data);
 
 	// Set up the language model (ChatGPT) for processing text
 	const llm = new ChatOpenAI({
@@ -114,9 +108,21 @@ const initializeRagChain = async (pdfPath, parseTables = false) => {
 	// Create a chain of processes to format documents, ask questions, and generate responses
 	const runnableRagChain = RunnableSequence.from([
 		{
-			context: vectorStoreRetriever.pipe(formatDocumentsAsString), // Convert documents to string for the model
-			question: new RunnablePassthrough(), // Pass the question directly
+			context: RunnableSequence.from([
+				(input) => input.vectorQuery,
+				vectorStoreRetriever,
+				formatDocumentsAsString,
+			]),
+			question: (input) => input.llmPrompt,
 		},
+		new RunnablePassthrough({
+			func: (input) => {
+				// This logging step is now even more useful!
+				console.log("Context provided to LLM:\n\n", input.context);
+				console.log("Question (LLM Prompt) provided to LLM:\n\n", input.question);
+				return input;
+			},
+		}),
 		customRagPrompt, // Use the RAG prompt
 		llm, // Use the language model
 		new StringOutputParser(), // Parse the model's output
