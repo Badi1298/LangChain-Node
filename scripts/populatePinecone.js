@@ -228,4 +228,4 @@ async function runIndexer() {
 }
 
 // --- Run the script ---
-runIndexer();
+// runIndexer();

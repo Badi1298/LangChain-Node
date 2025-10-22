@@ -6,10 +6,10 @@ let pineconeIndexInstance = null;
 try {
 	console.log("Initializing Pinecone client...");
 
-	const pc = new Pinecone({ apiKey: config.pinecone.apiKey });
+	// const pc = new Pinecone({ apiKey: config.pinecone.apiKey });
 
 	console.log(`Accessing Pinecone index: ${config.pinecone.indexName}`);
-	pineconeIndexInstance = pc.Index(config.pinecone.indexName);
+	// pineconeIndexInstance = pc.Index(config.pinecone.indexName);
 
 	console.log("Pinecone index object ready.");
 	// Optional: Add a quick check like describeIndexStats here to confirm connection on startup
