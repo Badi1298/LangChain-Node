@@ -99,7 +99,8 @@ const createRagChain = async (vectorStore) => {
     please answer the question as accurately and concisely as possible. 
     Return only the requested information, do not include any additional explanations or context. 
     If the information is not directly found in the context, do not guess, do not use any external 
-    information, do not use any prior knowledge. Just respond with null.
+    information, do not use any prior knowledge. Just respond with null. 
+	All date formats must be dd.mm.yyyy, for example: 28.10.2015
 
     Context: {context}
 
