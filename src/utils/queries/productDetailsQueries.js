@@ -67,6 +67,45 @@ module.exports = {
 				llmPrompt:
 					"Maturity Date (also called 'Redemption Date'), it's when the settlement occurs to end the product, so it's 1 or 2 weeks after the Final Fixing Date generally.",
 			},
+			hasLowStrikeAndBarrier: {
+				vectorQuery: "Low Strike, Barrier Level, Knock-in Level",
+				llmPrompt:
+					"Does the product have both a Low Strike and a Barrier Level (Knock-in Level)? Return true or false.",
+			},
+			lowStrikeLevelPercentage: {
+				vectorQuery: "Low Strike Level",
+				llmPrompt: "What is the Low Strike Level, as a number, e.g., for 80%, use 80.",
+			},
+			redemptionType: {
+				vectorQuery:
+					"Final Redemption settlement method (Cash or Physical), Payout at maturity in case of barrier breach",
+				llmPrompt:
+					"Redemption Type (Cash/Physical). If you see “Cash and Physical” or similar wording, then it's Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario.",
+			},
+			assetClass: {
+				vectorQuery: "Underlying Asset Class, Equity, Index, ETF, Commodity, FX",
+				llmPrompt:
+					"What is the Asset Class (Equity, Index, Credit, Commodities, FX, Rates or Mixed). Note that if you think the underlying is an index or ETF containing stocks and you have other underlyings being stocks, you can put 'Equity'. Else it's Mixed.",
+			},
+			valoren: {
+				vectorQuery: "Valoren Number, Valoren, Common Code",
+				llmPrompt: "What is the Valoren / Common Code of the product?",
+			},
+			denomination: {
+				vectorQuery: "Denomination, Nominal Value, Face Value",
+				llmPrompt:
+					"What is the Denomination (also called Nominal Value or Face Value) of the product, as a number? For example, for 1,000 CHF, return 1000.",
+			},
+			issuePrice: {
+				vectorQuery: "Issue Price",
+				llmPrompt:
+					"Issue Price (number, can be % if it quote in Notional or not if it's in Units). Return only a number, no % sign.",
+			},
+			minimumTradingSize: {
+				vectorQuery: "Minimum Trading Size, Denomination, Nominal Value, Face Value",
+				llmPrompt:
+					"Minimum Trading Size (if no information about minimum trading size, then use the denomination for this value). Return only a number.",
+			},
 		},
 	},
 };
