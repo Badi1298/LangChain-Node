@@ -88,7 +88,7 @@ const initializeRagChain = async (pdfPath, parseTables = false) => {
 
 	// Set up the language model (ChatGPT) for processing text
 	const llm = new ChatOpenAI({
-		model: "gpt-5", // GPT model being used
+		model: "gpt-5-mini", // GPT model being used
 	});
 
 	const customTemplate = `You are a financial expert. Given the following context from the document, 

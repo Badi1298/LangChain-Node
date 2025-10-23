@@ -3,25 +3,25 @@ const { IssuersId, ProductTypesId } = require("../../config/constants.js");
 module.exports = {
 	[IssuersId.EFG_INTERNATIONAL]: {
 		[ProductTypesId.PHOENIX_AUTOCALL]: {
-			maturity: {
+			maturityInMonths: {
 				vectorQuery:
 					"Maturity, Initial Fixing Date, Final Fixing Date, Initial Valuation Date, Final Valuation Date",
 				llmPrompt:
 					"Maturity is the difference between the Initial Fixing Date and Final Fixing Date (also knows as Initial Valuation Date and Final Valuation Date). Return only an integer number e.g. 12, 18, ...)",
 			},
-			frequency: {
+			observationsFrequency: {
 				vectorQuery: "Observations Frequency, monthly, quarterly, semi_annually, annually",
 				llmPrompt:
 					"What is the Observations Frequency (monthly, quarterly, semi_annually, annually or other)? Return only one of these values: monthly, quarterly, semi_annually, annually or other.",
 			},
-			couponBarrier: {
+			couponBarrierPercentage: {
 				vectorQuery: "Coupon Barrier Level",
 				llmPrompt: "What is the Coupon Barrier Level, as a number, e.g., for 70%, use 70.",
 			},
-			couponLevel: {
-				vectorQuery: "Coupon Level",
+			couponLevelPerPeriod: {
+				vectorQuery: "Coupon Level (per period / per denomination), coupon rate",
 				llmPrompt:
-					"What is the Coupon Level, as a number? Coupon Level (per period, as a number). Return only a number.",
+					"Coupon Level (per period, as a number). It is probably a percentage of the denomination. Do not confuse it with the coupon barrier. Return only a number, no %.",
 			},
 			hasMemoryEffect: {
 				vectorQuery: `
