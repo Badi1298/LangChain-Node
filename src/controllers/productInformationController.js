@@ -32,6 +32,8 @@ exports.parseProductInformationTermsheet = async (req, res) => {
 
 		const runnableRagChain = await createRagChain(vectorStore);
 
+		console.log(runnableRagChain);
+
 		// Execute all query streams concurrently to extract issuer, notional, ISIN, and currency data.
 		const [issuerData, notional, isin, currency] = await Promise.all(
 			queries[9].map((query) => runnableRagChain.invoke(query))
