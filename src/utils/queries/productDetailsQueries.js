@@ -3,6 +3,12 @@ const { IssuersId, ProductTypesId } = require("../../config/constants.js");
 module.exports = {
 	[IssuersId.EFG_INTERNATIONAL]: {
 		[ProductTypesId.PHOENIX_AUTOCALL]: {
+			protectionType: {
+				vectorQuery:
+					"Knock-in Event / Barrier Level definition and its effect on Final Payout / Level.",
+				llmPrompt:
+					"Protection Type - it's 'Low Strike', 'European Barrier', 'American Barrier' or 'Daily Close Barrier'. Low Strike is when the loss begins from another level than the Initial Fixing Level of the worst performing underlying. European Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation at Maturity. American barrier is when the barrier observation is continuous during the product lifetime. Daily close is as american barrier but we don't observe all trading levels, only the closing levels, during the product lifetime. We can have both one of the 3 barriers AND a low strike, meaning the observation on the underlying level is from a certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, in this case the Protection Type is NOT low strike, it's one of the 3 barriers",
+			},
 			maturityInMonths: {
 				vectorQuery:
 					"Maturity, Initial Fixing Date, Final Fixing Date, Initial Valuation Date, Final Valuation Date",
