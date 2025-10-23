@@ -8,7 +8,7 @@ const config = {
 	// 	// Add region/cloud if needed by your Pinecone client version/setup
 	// },
 	openai: {
-		apiKey: process.env.OPENAI_API_KEY,
+		apiKey: process.env.OPENAI_NEW_API_KEY,
 		embeddingModel: "text-embedding-3-small", // Or load from env
 	},
 	// Define VECTOR_DIMENSION based on the chosen embedding model
