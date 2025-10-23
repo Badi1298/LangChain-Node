@@ -4,16 +4,17 @@ const router = express.Router();
 
 const productDetailsController = require("../controllers/productDetailsController");
 const productInformationController = require("../controllers/productInformationController");
+const vectorizeController = require("../controllers/vectorizeController");
+
+router.post("/vectorize-pdf", upload.single("pdf"), vectorizeController.vectorizePdf);
 
 router.post(
 	"/parse-product-information-termsheet",
-	upload.single("pdf"),
 	productInformationController.parseProductInformationTermsheet
 );
 
 router.post(
 	"/parse-product-details-termsheet",
-	upload.single("pdf"),
 	productDetailsController.parseProductDetailsTermsheet
 );
 

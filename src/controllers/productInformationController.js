@@ -1,47 +1,41 @@
-const path = require("path");
-const fs = require("fs").promises; // Using fs promises to delete files asynchronously
-
-const { initializeRagChain } = require("../services/initializeRagChain");
+const { createRagChain } = require("../services/initializeRagChain");
 const queries = require("../utils/queries/productInformationQueries");
+const { getVectorStore } = require("./vectorizeController");
 
 const { getIssuer } = require("../services/product-information/parseProductInformation");
 
 /**
- * Parses product information from an uploaded PDF file and extracts details like
+ * Parses product information from a vectorized PDF file and extracts details like
  * issuer, notional, ISIN, and currency using a RAG (Retrieval-Augmented Generation) chain.
  *
- * @param {Object} req - The request object containing the uploaded file.
+ * @param {Object} req - The request object containing the fileId.
  * @param {Object} res - The response object used to send the result or errors back to the client.
  *
  * @returns {void}
  *
- * @throws Will throw an error if no file is uploaded, if an invalid response is returned by the RAG chain,
- * or if there is an issue with PDF processing or file deletion.
+ * @throws Will throw an error if no fileId is provided, if the vector store is not found,
+ * or if there is an issue with the RAG chain.
  */
 exports.parseProductInformationTermsheet = async (req, res) => {
 	try {
-		// Check if a file has been uploaded with the request.
-		if (!req.file) {
-			// Return a 400 Bad Request response if no file is found.
-			return res.status(400).json({ message: "No file uploaded" });
+		const { fileId } = req.body;
+
+		if (!fileId) {
+			return res.status(400).json({ message: "No fileId provided" });
 		}
 
-		// Get the full file path of the uploaded PDF.
-		const pdfPath = path.join(process.cwd(), req.file.path);
+		const vectorStore = getVectorStore(fileId);
 
-		// Initialize the Retrieval-Augmented Generation (RAG) chain to process the PDF.
-		const runnableRagChain = await initializeRagChain(pdfPath);
+		if (!vectorStore) {
+			return res.status(404).json({ message: "Vector store not found for the given fileId" });
+		}
+
+		const runnableRagChain = await createRagChain(vectorStore);
 
 		// Execute all query streams concurrently to extract issuer, notional, ISIN, and currency data.
 		const [issuerData, notional, isin, currency] = await Promise.all(
 			queries[9].map((query) => runnableRagChain.invoke(query))
 		);
-
-		// // Check if the issuer data contains an invalid response (e.g., "I don't know").
-		// if (issuerData.toLocaleLowerCase().includes("i don't know")) {
-		//   // Throw an error if the response is invalid.
-		//   throw new Error();
-		// }
 
 		console.log(issuerData, notional, isin, currency);
 
@@ -61,17 +55,6 @@ exports.parseProductInformationTermsheet = async (req, res) => {
 		console.error(error);
 
 		// Send a 500 Internal Server Error response with an appropriate error message.
-		res.status(500).json({ message: "Error loading PDF" });
-	} finally {
-		// Ensure the uploaded file is deleted, even if an error occurs.
-		if (req.file) {
-			const pdfPath = path.join(process.cwd(), req.file.path);
-			try {
-				await fs.unlink(pdfPath);
-			} catch (unlinkError) {
-				// Log any errors that occur during file deletion.
-				console.error("Error deleting file:", unlinkError.message);
-			}
-		}
+		res.status(500).json({ message: "Error processing request" });
 	}
 };

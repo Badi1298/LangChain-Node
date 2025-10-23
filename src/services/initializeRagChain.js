@@ -43,7 +43,7 @@ function extractTablesFromPDF(pdfPath) {
 	});
 }
 
-const initializeRagChain = async (pdfPath, parseTables = false) => {
+const initializeVectorStore = async (pdfPath, parseTables = false) => {
 	let extractedTables = "";
 
 	if (parseTables) {
@@ -80,8 +80,12 @@ const initializeRagChain = async (pdfPath, parseTables = false) => {
 		new OpenAIEmbeddings() // Using OpenAI embeddings to convert text to vectors
 	);
 
+	return inMemoryVectorStore;
+};
+
+const createRagChain = async (vectorStore) => {
 	// Set up a retriever to perform similarity-based search in the vector store
-	const vectorStoreRetriever = inMemoryVectorStore.asRetriever({
+	const vectorStoreRetriever = vectorStore.asRetriever({
 		k: 6, // Return the top 6 most similar chunks
 		searchType: "similarity", // Search based on similarity
 	});
@@ -131,4 +135,4 @@ const initializeRagChain = async (pdfPath, parseTables = false) => {
 	return runnableRagChain;
 };
 
-module.exports = { initializeRagChain };
+module.exports = { initializeVectorStore, createRagChain };
