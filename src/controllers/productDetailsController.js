@@ -2,13 +2,7 @@ const { createRagChain } = require("../services/initializeRagChain");
 const { getVectorStore } = require("./vectorizeController");
 
 const queryMap = require("../utils/queries/productDetailsQueries");
-const {
-	isActiveFlag,
-	parseUnderlyings,
-	parseInitialFixings,
-	checkBarrierConditions,
-} = require("../services/product-details/parseProductDetails");
-const { buildPrefillPanel } = require("../utils/prefillPanel/prefillBuild");
+const underlyingsQueryMap = require("../utils/queries/productUnderlyingsQueries");
 
 /**
  * Parses product details from a vectorized PDF file, extracting information such as
@@ -39,6 +33,48 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 		const runnableRagChain = await createRagChain(vectorStore);
 
 		const queries = queryMap[issuerId][categoryId];
+
+		const results = await Promise.all(
+			Object.values(queries).map((query) => runnableRagChain.invoke(query))
+		);
+
+		// Map the results to their corresponding query names
+		const ragResults = Object.keys(queries).reduce((acc, key, index) => {
+			acc[key] = results[index];
+			return acc;
+		}, {});
+
+		// Send the extracted data back to the client as a successful JSON response.
+		res.json({
+			success: true,
+			data: ragResults,
+		});
+	} catch (error) {
+		// Log the error details in the server console.
+		console.error(error);
+
+		// Send a 500 Internal Server Error response with an appropriate error message.
+		res.status(500).json({ message: "Error processing request" });
+	}
+};
+
+exports.parseProductUnderlyings = async (req, res) => {
+	try {
+		const { fileId, issuerId, categoryId } = req.body;
+
+		if (!fileId) {
+			return res.status(400).json({ message: "No fileId provided" });
+		}
+
+		const vectorStore = getVectorStore(fileId);
+
+		if (!vectorStore) {
+			return res.status(404).json({ message: "Vector store not found for the given fileId" });
+		}
+
+		const runnableRagChain = await createRagChain(vectorStore);
+
+		const queries = underlyingsQueryMap[issuerId][categoryId];
 
 		const results = await Promise.all(
 			Object.values(queries).map((query) => runnableRagChain.invoke(query))

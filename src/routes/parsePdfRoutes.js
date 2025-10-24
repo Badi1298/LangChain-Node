@@ -18,4 +18,6 @@ router.post(
 	productDetailsController.parseProductDetailsTermsheet
 );
 
+router.post("/parse-product-underlyings", productDetailsController.parseProductUnderlyings);
+
 module.exports = router;
