@@ -13,43 +13,8 @@ const { StringOutputParser } = require("@langchain/core/output_parsers");
 const { RunnablePassthrough, RunnableSequence } = require("@langchain/core/runnables");
 const { formatDocumentsAsString } = require("langchain/util/document");
 
-function extractTablesFromPDF(pdfPath) {
-	return new Promise((resolve, reject) => {
-		// Spawn a child process to run the Python script
-		const pythonProcess = spawn("python3", [
-			path.join(__dirname, "../../scripts/extract_tables.py"),
-			pdfPath,
-		]);
-
-		// Collect data from Python script
-		let result = "";
-		pythonProcess.stdout.on("data", (data) => {
-			result += data.toString();
-		});
-
-		// Handle errors
-		pythonProcess.stderr.on("data", (data) => {
-			reject(`Error: ${data}`);
-		});
-
-		// Resolve the promise when the script finishes
-		pythonProcess.on("close", (code) => {
-			if (code === 0) {
-				resolve(result);
-			} else {
-				reject(`Python script exited with code ${code}`);
-			}
-		});
-	});
-}
-
-const initializeVectorStore = async (pdfPath, parseTables = false) => {
+const initializeVectorStore = async (pdfPath) => {
 	let extractedTables = "";
-
-	if (parseTables) {
-		extractedTables = await extractTablesFromPDF(pdfPath);
-		console.log(extractedTables);
-	}
 
 	const loader = new PDFLoader(pdfPath, {
 		// you may need to add `.then(m => m.default)` to the end of the import
@@ -60,12 +25,6 @@ const initializeVectorStore = async (pdfPath, parseTables = false) => {
 
 	// Load and parse the PDF using PDFLoader
 	const loadedDocs = await loader.load();
-
-	if (parseTables) {
-		const combinedExtractedTable = loadedDocs[0].pageContent.concat("\n", extractedTables);
-
-		loadedDocs[0].pageContent = combinedExtractedTable;
-	}
 
 	// Split the parsed PDF text into smaller chunks for processing
 	const splitter = new RecursiveCharacterTextSplitter({
