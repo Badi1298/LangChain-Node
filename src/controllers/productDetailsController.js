@@ -30,24 +30,28 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 			return res.status(404).json({ message: "Vector store not found for the given fileId" });
 		}
 
-		const runnableRagChain = await createRagChain(vectorStore);
+		const agent = await createRagChain(vectorStore);
 
-		const queries = queryMap[issuerId][categoryId];
+		const inputMessage = `Protection Type - it's 'Low Strike', 'European Barrier', 
+		'American Barrier' or 'Daily Close Barrier'. Low Strike is when the loss begins from 
+		another level than the Initial Fixing Level of the worst performing underlying. European 
+		Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation 
+		at Maturity. American barrier is when the barrier observation is continuous during the 
+		product lifetime. Daily close is as american barrier but we don't observe all trading 
+		levels, only the closing levels, during the product lifetime. We can have both one of the 
+		3 barriers AND a low strike, meaning the observation on the underlying level is from a 
+		certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, 
+		in this case the Protection Type is NOT low strike, it's one of the 3 barriers`;
 
-		const results = await Promise.all(
-			Object.values(queries).map((query) => runnableRagChain.invoke(query))
-		);
+		console.log("aaaaa");
 
-		// Map the results to their corresponding query names
-		const ragResults = Object.keys(queries).reduce((acc, key, index) => {
-			acc[key] = results[index];
-			return acc;
-		}, {});
+		const result = await agent.invoke({
+			messages: [{ role: "user", content: inputMessage }],
+		});
 
-		// Send the extracted data back to the client as a successful JSON response.
 		res.json({
 			success: true,
-			data: ragResults,
+			data: result,
 		});
 	} catch (error) {
 		// Log the error details in the server console.

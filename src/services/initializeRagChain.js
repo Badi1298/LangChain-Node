@@ -9,9 +9,11 @@ const { PDFLoader } = require("@langchain/community/document_loaders/fs/pdf");
 const { z } = require("zod");
 const { createAgent } = require("langchain");
 const { tool } = require("@langchain/core/tools");
-const { SystemMessage } = require("@langchain/core/messages");
+const { SystemMessage, HumanMessage } = require("@langchain/core/messages");
+const { ChatPromptTemplate, MessagesPlaceholder } = require("@langchain/core/prompts");
 
 const retrieveSchema = z.object({ query: z.string() });
+const responseSchema = z.object({ protection_type: z.string() });
 
 const initializeVectorStore = async (pdfPath) => {
 	const embeddings = new OpenAIEmbeddings({
@@ -62,12 +64,21 @@ const createRagChain = async (vectorStore) => {
 
 	// Set up a retriever to perform similarity-based search in the vector store
 	const tools = [retrieve];
-	const systemPrompt = new SystemMessage(
+	const systemPrompt =
 		"You have access to a tool that retrieves context from a financial Termsheet. " +
-			"Use the tool to help answer user queries."
-	);
+		"Use the tool to help answer user queries.";
 
-	const agent = createAgent({ model, tools, systemPrompt });
+	const prompt = ChatPromptTemplate.fromMessages([
+		["system", systemPrompt],
+		new MessagesPlaceholder("messages"),
+	]);
+
+	const agent = createAgent({
+		model,
+		tools,
+		prompt,
+		responseFormat: responseSchema,
+	});
 
 	return agent;
 };
