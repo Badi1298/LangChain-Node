@@ -6,9 +6,10 @@ const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
 
 const { PDFLoader } = require("@langchain/community/document_loaders/fs/pdf");
 
-const { initChatModel } = require("langchain");
 const { z } = require("zod");
+const { createAgent } = require("langchain");
 const { tool } = require("@langchain/core/tools");
+const { SystemMessage } = require("@langchain/core/messages");
 
 const retrieveSchema = z.object({ query: z.string() });
 
@@ -38,6 +39,11 @@ const initializeVectorStore = async (pdfPath) => {
 };
 
 const createRagChain = async (vectorStore) => {
+	const model = new ChatOpenAI({
+		model: "gpt-5-mini",
+		apiKey: process.env.OPENAI_API_KEY,
+	});
+
 	const retrieve = tool(
 		async ({ query }) => {
 			const retrievedDocs = await vectorStore.similaritySearch(query, 2);
@@ -57,11 +63,11 @@ const createRagChain = async (vectorStore) => {
 	// Set up a retriever to perform similarity-based search in the vector store
 	const tools = [retrieve];
 	const systemPrompt = new SystemMessage(
-		"You have access to a tool that retrieves context from a blog post. " +
+		"You have access to a tool that retrieves context from a financial Termsheet. " +
 			"Use the tool to help answer user queries."
 	);
 
-	const agent = createAgent({ model: "openai:gpt-5", tools, systemPrompt });
+	const agent = createAgent({ model, tools, systemPrompt });
 
 	return agent;
 };
