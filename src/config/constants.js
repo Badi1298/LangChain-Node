@@ -1,3 +1,4 @@
+// Product information constants
 const IssuersId = Object.freeze({
 	EFG_INTERNATIONAL: 9,
 });
@@ -7,6 +8,12 @@ const ProductTypesId = Object.freeze({
 	REVERSE_CONVERTIBLE: 9,
 });
 
+const SizeTypes = Object.freeze({
+	NOTIONAL: 1,
+	UNITS: 2,
+});
+
+// Product overview constants
 const BarrierTypes = Object.freeze({
 	LOW_STRIKE_LEVEL: 1,
 	EUROPEAN_CAPITAL_BARRIER: 2,
@@ -32,11 +39,6 @@ const AutocallTriggerTypes = Object.freeze({
 const MemoryTypes = Object.freeze({
 	YES: 1,
 	NO: 2,
-});
-
-const SizeTypes = Object.freeze({
-	NOTIONAL: 1,
-	UNITS: 2,
 });
 
 const RedemptionTypes = Object.freeze({

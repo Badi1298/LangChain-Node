@@ -2,6 +2,8 @@ const fs = require("fs");
 const openaiInstance = require("../services/openaiClient");
 const { createFile, vectoriseFile } = require("../services/openaiVectoriseFile");
 
+const { SizeTypes } = require("../config/constants");
+
 const parsePdfSectionsController = {
 	vectorialisePdf: async (req, res) => {
 		try {
@@ -75,7 +77,7 @@ const parsePdfSectionsController = {
 		}
 	},
 
-	getOverview: async (req, res) => {
+	getInformation: async (req, res) => {
 		try {
 			const { vectorStoreId } = req.body;
 			if (!vectorStoreId) {
@@ -114,10 +116,20 @@ const parsePdfSectionsController = {
 				],
 			});
 
+			const responseData = JSON.parse(response.output_text);
+
+			// Map the response data to the expected format
+			const mappedResponseData = {
+				isin: responseData.isin || null,
+				quoteType: SizeTypes[responseData?.quoteType?.toUpperCase()] || null,
+				issuer: responseData.issuer || null,
+				currency: responseData.currency || null,
+			};
+
 			res.status(200).json({
 				success: true,
 				message: "Section 1 processed successfully.",
-				data: response.output_text,
+				data: mappedResponseData,
 			});
 		} catch (error) {
 			console.error("Error processing Section 1:", error);
