@@ -56,7 +56,8 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 
 		res.json({
 			success: true,
-			data: result,
+			messages: result.messages,
+			data: result.structuredResponse,
 		});
 	} catch (error) {
 		// Log the error details in the server console.
