@@ -41,11 +41,6 @@ const initializeVectorStore = async (pdfPath) => {
 };
 
 const createRagChain = async (vectorStore) => {
-	const model = new ChatOpenAI({
-		model: "gpt-5-mini",
-		apiKey: process.env.OPENAI_API_KEY,
-	});
-
 	const retrieve = tool(
 		async ({ query }) => {
 			const retrievedDocs = await vectorStore.similaritySearch(query, 2);
@@ -64,21 +59,18 @@ const createRagChain = async (vectorStore) => {
 
 	// Set up a retriever to perform similarity-based search in the vector store
 	const tools = [retrieve];
-	const systemPrompt =
-		"You have access to a tool that retrieves context from a financial Termsheet. " +
-		"Use the tool to help answer user queries.";
 
-	const prompt = ChatPromptTemplate.fromMessages([
-		["system", systemPrompt],
-		new MessagesPlaceholder("messages"),
-	]);
+	console.log("aaaaaa");
 
 	const agent = createAgent({
-		model,
+		model: "openai:gpt-5",
 		tools,
-		prompt,
+		systemPrompt:
+			"You have access to a tool that retrieves context from a financial Termsheet. Use the tool to help answer user queries.",
 		responseFormat: responseSchema,
 	});
+
+	console.log("ccccccc");
 
 	return agent;
 };

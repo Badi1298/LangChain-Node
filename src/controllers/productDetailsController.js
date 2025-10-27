@@ -32,7 +32,9 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 
 		const agent = await createRagChain(vectorStore);
 
-		const inputMessage = `Protection Type - it's 'Low Strike', 'European Barrier', 
+		const inputMessage = `
+		Field definition to generate the query for the tool:
+		Protection Type - it's 'Low Strike', 'European Barrier', 
 		'American Barrier' or 'Daily Close Barrier'. Low Strike is when the loss begins from 
 		another level than the Initial Fixing Level of the worst performing underlying. European 
 		Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation 
@@ -41,13 +43,16 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 		levels, only the closing levels, during the product lifetime. We can have both one of the 
 		3 barriers AND a low strike, meaning the observation on the underlying level is from a 
 		certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, 
-		in this case the Protection Type is NOT low strike, it's one of the 3 barriers`;
+		in this case the Protection Type is NOT low strike, it's one of the 3 barriers
+		
+		Using the above field definition, please identify and return the 'protection_type' only.
 
-		console.log("aaaaa");
+		Make sure your final answer contains ONLY the protection_type value, without any explanations 
+		or additional information.`;
 
-		const result = await agent.invoke({
-			messages: [{ role: "user", content: inputMessage }],
-		});
+		let agentInputs = { messages: [{ role: "user", content: inputMessage }] };
+
+		const result = await agent.invoke(agentInputs);
 
 		res.json({
 			success: true,
