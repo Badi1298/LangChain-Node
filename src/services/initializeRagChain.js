@@ -9,11 +9,8 @@ const { PDFLoader } = require("@langchain/community/document_loaders/fs/pdf");
 const { z } = require("zod");
 const { createAgent } = require("langchain");
 const { tool } = require("@langchain/core/tools");
-const { SystemMessage, HumanMessage } = require("@langchain/core/messages");
-const { ChatPromptTemplate, MessagesPlaceholder } = require("@langchain/core/prompts");
 
 const retrieveSchema = z.object({ query: z.string() });
-const responseSchema = z.object({ protection_type: z.string() });
 
 const initializeVectorStore = async (pdfPath) => {
 	const embeddings = new OpenAIEmbeddings({
@@ -40,7 +37,12 @@ const initializeVectorStore = async (pdfPath) => {
 	return vectorStore;
 };
 
-const createRagChain = async (vectorStore) => {
+const createRagChain = async (vectorStore, responseSchema) => {
+	const model = new ChatOpenAI({
+		modelName: "gpt-5-mini",
+		maxTokens: 1000,
+	});
+
 	const retrieve = tool(
 		async ({ query }) => {
 			const retrievedDocs = await vectorStore.similaritySearch(query, 2);
@@ -60,17 +62,13 @@ const createRagChain = async (vectorStore) => {
 	// Set up a retriever to perform similarity-based search in the vector store
 	const tools = [retrieve];
 
-	console.log("aaaaaa");
-
 	const agent = createAgent({
-		model: "openai:gpt-5",
+		model,
 		tools,
 		systemPrompt:
 			"You have access to a tool that retrieves context from a financial Termsheet. Use the tool to help answer user queries.",
 		responseFormat: responseSchema,
 	});
-
-	console.log("ccccccc");
 
 	return agent;
 };

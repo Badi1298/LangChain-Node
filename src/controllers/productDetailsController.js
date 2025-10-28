@@ -1,3 +1,5 @@
+const { z } = require("zod");
+
 const { createRagChain } = require("../services/initializeRagChain");
 const { getVectorStore } = require("./vectorizeController");
 
@@ -18,7 +20,7 @@ const underlyingsQueryMap = require("../utils/queries/productUnderlyingsQueries"
  */
 exports.parseProductDetailsTermsheet = async (req, res) => {
 	try {
-		const { fileId, issuerId, categoryId } = req.body;
+		const { fileId } = req.body;
 
 		if (!fileId) {
 			return res.status(400).json({ message: "No fileId provided" });
@@ -30,7 +32,9 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 			return res.status(404).json({ message: "Vector store not found for the given fileId" });
 		}
 
-		const agent = await createRagChain(vectorStore);
+		const responseSchema = z.object({ protection_type: z.string() });
+
+		const agent = await createRagChain(vectorStore, responseSchema);
 
 		const inputMessage = `
 		Field definition to generate the query for the tool:
