@@ -48,11 +48,7 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 		3 barriers AND a low strike, meaning the observation on the underlying level is from a 
 		certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, 
 		in this case the Protection Type is NOT low strike, it's one of the 3 barriers
-		
-		Using the above field definition, please identify and return the 'protection_type' only.
-
-		Make sure your final answer contains ONLY the protection_type value, without any explanations 
-		or additional information.`;
+		`;
 
 		let agentInputs = { messages: [{ role: "user", content: inputMessage }] };
 

@@ -66,7 +66,7 @@ const createRagChain = async (vectorStore, responseSchema) => {
 		model,
 		tools,
 		systemPrompt:
-			"You have access to a tool that retrieves context from a financial Termsheet. Use the tool to help answer user queries.",
+			"You have access to a tool that retrieves context from a financial Termsheet. Use the tool to help answer user queries. Use only the information provided by the tool to form your answers. Return only the exact answer without any additional commentary.",
 		responseFormat: responseSchema,
 	});
 
