@@ -1,6 +1,6 @@
 const { z } = require("zod");
 
-const { createRagChain } = require("../services/initializeRagChain");
+const { createRagAgent } = require("../services/initializeRagChain");
 const { getVectorStore } = require("./vectorizeController");
 
 const queryMap = require("../utils/queries/productDetailsQueries");
@@ -32,9 +32,11 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 			return res.status(404).json({ message: "Vector store not found for the given fileId" });
 		}
 
-		const responseSchema = z.object({ protection_type: z.string() });
+		const agent = await createRagAgent(vectorStore);
 
-		const agent = await createRagChain(vectorStore, responseSchema);
+		agent.options.responseFormat = z.object({
+			protectionType: z.string(),
+		});
 
 		const inputMessage = `
 		Field definition to generate the query for the tool:
@@ -48,6 +50,8 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 		3 barriers AND a low strike, meaning the observation on the underlying level is from a 
 		certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, 
 		in this case the Protection Type is NOT low strike, it's one of the 3 barriers
+
+		Return the protection type only as one of the 4 options above.
 		`;
 
 		let agentInputs = { messages: [{ role: "user", content: inputMessage }] };
@@ -82,7 +86,7 @@ exports.parseProductUnderlyings = async (req, res) => {
 			return res.status(404).json({ message: "Vector store not found for the given fileId" });
 		}
 
-		const runnableRagChain = await createRagChain(vectorStore);
+		const runnableRagChain = await createRagAgent(vectorStore);
 
 		const queries = underlyingsQueryMap[issuerId][categoryId];
 

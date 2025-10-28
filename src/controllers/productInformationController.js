@@ -1,4 +1,4 @@
-const { createRagChain } = require("../services/initializeRagChain");
+const { createRagAgent } = require("../services/initializeRagChain");
 const queries = require("../utils/queries/productInformationQueries");
 const { getVectorStore } = require("./vectorizeController");
 
@@ -30,7 +30,7 @@ exports.parseProductInformationTermsheet = async (req, res) => {
 			return res.status(404).json({ message: "Vector store not found for the given fileId" });
 		}
 
-		const runnableRagChain = await createRagChain(vectorStore);
+		const runnableRagChain = await createRagAgent(vectorStore);
 
 		console.log(runnableRagChain);
 

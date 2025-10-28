@@ -37,9 +37,9 @@ const initializeVectorStore = async (pdfPath) => {
 	return vectorStore;
 };
 
-const createRagChain = async (vectorStore, responseSchema) => {
+const createRagAgent = async (vectorStore) => {
 	const model = new ChatOpenAI({
-		modelName: "gpt-5-mini",
+		modelName: "gpt-5",
 		maxTokens: 1000,
 	});
 
@@ -66,11 +66,10 @@ const createRagChain = async (vectorStore, responseSchema) => {
 		model,
 		tools,
 		systemPrompt:
-			"You have access to a tool that retrieves context from a financial Termsheet. Use the tool to help answer user queries. Use only the information provided by the tool to form your answers. Return only the exact answer without any additional commentary.",
-		responseFormat: responseSchema,
+			"You have access to a tool that retrieves context from a financial Termsheet. Use the tool to help answer user queries. Use only the information provided by the tool to form your answers. Return only the exact answer without any additional commentary. If you can not find the answer in the provided context, return null.",
 	});
 
 	return agent;
 };
 
-module.exports = { initializeVectorStore, createRagChain };
+module.exports = { initializeVectorStore, createRagAgent };
