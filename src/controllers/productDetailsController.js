@@ -1,9 +1,9 @@
 const { z } = require("zod");
 
-const { createRagAgent } = require("../services/initializeRagChain");
+const { createRagAgent, setResponseFormat } = require("../services/initializeRagChain");
 const { getVectorStore } = require("./vectorizeController");
 
-const queryMap = require("../utils/queries/productDetailsQueries");
+const queries = require("../utils/queries/productDetailsQueries");
 const underlyingsQueryMap = require("../utils/queries/productUnderlyingsQueries");
 
 /**
@@ -33,35 +33,27 @@ exports.parseProductDetailsTermsheet = async (req, res) => {
 		}
 
 		const agent = await createRagAgent(vectorStore);
+		const data = {};
 
-		agent.options.responseFormat = z.object({
-			protectionType: z.string(),
+		const results = await Promise.all(
+			Object.entries(queries).map(async ([key, inputMessage]) => {
+				const agentInputs = { messages: [{ role: "user", content: inputMessage }] };
+				const result = await agent.invoke(agentInputs);
+				return {
+					key,
+					content: result.messages[result.messages.length - 1].content,
+				};
+			})
+		);
+
+		// Map results back to data object
+		results.forEach(({ key, content }) => {
+			data[key] = content;
 		});
-
-		const inputMessage = `
-		Field definition to generate the query for the tool:
-		Protection Type - it's 'Low Strike', 'European Barrier', 
-		'American Barrier' or 'Daily Close Barrier'. Low Strike is when the loss begins from 
-		another level than the Initial Fixing Level of the worst performing underlying. European 
-		Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation 
-		at Maturity. American barrier is when the barrier observation is continuous during the 
-		product lifetime. Daily close is as american barrier but we don't observe all trading 
-		levels, only the closing levels, during the product lifetime. We can have both one of the 
-		3 barriers AND a low strike, meaning the observation on the underlying level is from a 
-		certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, 
-		in this case the Protection Type is NOT low strike, it's one of the 3 barriers
-
-		Return the protection type only as one of the 4 options above.
-		`;
-
-		let agentInputs = { messages: [{ role: "user", content: inputMessage }] };
-
-		const result = await agent.invoke(agentInputs);
 
 		res.json({
 			success: true,
-			messages: result.messages,
-			data: result.structuredResponse,
+			data,
 		});
 	} catch (error) {
 		// Log the error details in the server console.

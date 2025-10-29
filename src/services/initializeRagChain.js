@@ -55,7 +55,7 @@ const createRagAgent = async (vectorStore) => {
 			name: "retrieve",
 			description: "Retrieve information related to a query.",
 			schema: retrieveSchema,
-			responseFormat: "content_and_artifact",
+			responseFormat: "content",
 		}
 	);
 
