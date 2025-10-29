@@ -49,7 +49,7 @@ const parsePdfController = {
 			);
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-4.1-2025-04-14",
+				model: "gpt-4.1",
 				input: `
 				You are an expert financial analyst. 
 				Your task is to extract information from the provided document text and return *only* a single, valid JSON object (no '''json flags are needed). 
@@ -65,58 +65,33 @@ const parsePdfController = {
 					
 				Field Definitions:
 
-				ISIN: null
-
-				Does the product quote in "Notional" or "Units": null
-
-				Issuer: null
-
-				Currency: null
-
-				Initial Fixing Date (Also called "Trade Date" or "Strike Date", it's the date when the fixing of the underlyings occurred)
-
-				Valuation Date (also called "issue date", it's when the settlement occurs, generally 1 or 2 weeks after Initial Fixing Date)
-
-				Final Fixing Date (also called "valuation date", it's the date when we observe the final levels of the underlyings on the closing)
-
-				Maturity Date (also called "redemption date", it's when the settlement occurs to end the product, so it's 1 or 2 weeks after the Final Fixing Date generally)
-
-				Maturity in Months (round to closest integer. Maturity is the difference between the Initial Fixing Date and Final Fixing Date. Only an integer number e.g. 12, 18, ...)
-
-				Observations Frequency (monthly, quarterly, semi_annually, annually or other)
-
-				Coupon Barrier (as a number, e.g., for 70%, use 70)
-
-				Coupon Level (per period, as a number)
-
-				Memory Effect on the Coupon (i.e. will all the possibly missed coupons be paid when a coupon is paid? true or false)
-
-				Non-Call period (number of observed periods where the product can NOT be early redeemed, we just observe the coupon. Integer number, 1, 2, 3, etc. This value represents how many observation or coupon periods must pass before the product becomes eligible for early redemption or “autocall.” It can be determined by comparing the schedule of Autocall Valuation Dates and Interest Valuation Dates: the Non-Call period ends when the first Autocall Valuation Date appears. For example, if the first Autocall Valuation Date occurs on the second coupon date, the Non-Call period equals 1; if it occurs on the third coupon date, the Non-Call period equals 2, and so on. In other words, count the number of coupon observation periods before the first possible early redemption observation date. Do not confuse this with the number of years or the Autocall Barrier level itself.)
-
-				Autocall Trigger ("Fix" or "Stepdown". Autocall Trigger is the level above which all underlyings must close on an observation date for the product to be early redeemed. Fix means it's always the same level. Stepdown is when the level decreases on each observation)
-
-				Capital Protection Level (as a number. If at least one stock decreases below this level then the capital is impacted)
-
-				Protection Type (it's "Low Strike", "European Barrier", "American Barrier" or "Daily Close Barrier". Low Strike is when the loss begins from another level than the Initial Fixing Level of the worst performing underlying. European Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation at Maturity. American barrier is when the barrier observation is continuous during the product lifetime. Daily close is as american barrier but we don't observe all trading levels, only the closing levels, during the product lifetime. We can have both one of the 3 barriers AND a low strike, meaning the observation on the underlying level is from a certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, in this case the Protection Type is NOT low strike, it's one of the 3 barriers)
-
-				Do we have both a Low Strike and a Barrier ? (true / false)
-
-				If we have both a Low Strike and a Barrier, what is the Low Strike Level (as a number)
-
-				Redemption Type (Cash/Physical. If you see “Cash and Physical” or similar wording, then it's Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario)
-
-				Asset Class (Equity, Index, Credit, Commodities, FX, Rates or Mixed. Not that if you think the underlying is and index or ETF containing stocks and you have other underlyings being stocks, you can put "Equity". Else it's Mixed.)
-
-				Valoren/Common code (string)
-
-				Denomination (integer, number)
-
-				Issue Price (number, can be % if it quote si Notional or not if it's in Units)
-
-				Minimum Trading Size (if no information about minumum trading size, then use denomination for this value as well)
-
-				List of all Underlyings (it's possible that there's only 1. Put only Ticker + Initial Fixing. For instance: AAPL US ; 304.24. Please make sure to always return the full ticker - example: "AAPL US", "NVDA UW" - not just "AAPL", "NVDA"). If an Underlying has an initial fixing in GBP or GBp, you need to consider the initial fixing in GBp (so in pence). Example: if Rolls Royce has a fixing of 11.68 GBP, you must consider the initial fixing to be 1168 (because 1 GBP = 100 GBp)
-				Please create a table with all intermediary observation dates, with 4 columns 
+				- ISIN: null
+				- Does the product quote in "Notional" or "Units": null
+				- Issuer: null
+				- Currency: null
+				- Initial Fixing Date (Also called "Trade Date" or "Strike Date", it's the date when the fixing of the underlyings occurred): null
+				- Valuation Date (also called "issue date", it's when the settlement occurs, generally 1 or 2 weeks after Initial Fixing Date): null
+				- Final Fixing Date (also called "valuation date", it's the date when we observe the final levels of the underlyings on the closing): null
+				- Maturity Date (also called "redemption date", it's when the settlement occurs to end the product, so it's 1 or 2 weeks after the Final Fixing Date generally): null
+				- Maturity in Months (round to closest integer. Maturity is the difference between the Initial Fixing Date and Final Fixing Date. Only an integer number e.g. 12, 18, ...): null
+				- Observations Frequency (monthly, quarterly, semi_annually, annually or other): null
+				- Coupon Barrier (as a number, e.g., for 70%, use 70): null
+				- Coupon Level (per period, as a number): null
+				- Memory Effect on the Coupon (i.e. will all the possibly missed coupons be paid when a coupon is paid? true or false): null
+				- Non-Call period (number of observed periods where the product can NOT be early redeemed, we just observe the coupon. Integer number, 1, 2, 3, etc. This value represents how many observation or coupon periods must pass before the product becomes eligible for early redemption or “autocall.” It can be determined by comparing the schedule of Autocall Valuation Dates and Interest Valuation Dates: the Non-Call period ends when the first Autocall Valuation Date appears. For example, if the first Autocall Valuation Date occurs on the second coupon date, the Non-Call period equals 1; if it occurs on the third coupon date, the Non-Call period equals 2, and so on. In other words, count the number of coupon observation periods before the first possible early redemption observation date. Do not confuse this with the number of years or the Autocall Barrier level itself.)
+				- Autocall Trigger ("Fix" or "Stepdown". Autocall Trigger is the level above which all underlyings must close on an observation date for the product to be early redeemed. Fix means it's always the same level. Stepdown is when the level decreases on each observation)
+				- Capital Protection Level (as a number. If at least one stock decreases below this level then the capital is impacted)
+				- Protection Type (it's "Low Strike", "European Barrier", "American Barrier" or "Daily Close Barrier". Low Strike is when the loss begins from another level than the Initial Fixing Level of the worst performing underlying. European Barrier is when the loss starts from the Initial Fixing Level, with a barrier observation at Maturity. American barrier is when the barrier observation is continuous during the product lifetime. Daily close is as american barrier but we don't observe all trading levels, only the closing levels, during the product lifetime. We can have both one of the 3 barriers AND a low strike, meaning the observation on the underlying level is from a certain level (the barrier) and the loss starts from a lower level than the Initial Fixing, in this case the Protection Type is NOT low strike, it's one of the 3 barriers)
+				- Do we have both a Low Strike and a Barrier? (true / false)
+				- If we have both a Low Strike and a Barrier, what is the Low Strike Level (as a number)
+				- Redemption Type (Cash/Physical. If you see “Cash and Physical” or similar wording, then it's Physical. Physical is when the investor receives shares of the worst performing underlying at maturity in the negative scenario)
+				- Asset Class (Equity, Index, Credit, Commodities, FX, Rates or Mixed. Not that if you think the underlying is and index or ETF containing stocks and you have other underlyings being stocks, you can put "Equity". Else it's Mixed.)
+				- Valoren or Common Code (if "Valoren" string exists then use the value from that) (string)
+				- Denomination (integer, number)
+				- Issue Price (number, can be % if it quote si Notional or not if it's in Units)
+				- Minimum Trading Size (if no information about minumum trading size, then use denomination for this value as well)
+				- List of all Underlyings (it's possible that there's only 1. Put only Ticker + Initial Fixing. For instance: AAPL US ; 304.24. Please make sure to always return the full ticker - example: "AAPL US", "NVDA UW" - not just "AAPL", "NVDA"). If an Underlying has an initial fixing in GBP or GBp, you need to consider the initial fixing in GBp (so in pence). Example: if Rolls Royce has a fixing of 11.68 GBP, you must consider the initial fixing to be 1168 (because 1 GBP = 100 GBp)
+				- Please create a table with all intermediary observation dates, with 4 columns 
 				(Observation Date, Payment Date, Autocall Trigger level for said observation date 
 				in number format 100, 85, etc., not 0, -15, "Coupon" or "Autocall+Coupon" if on the said 
 				observation date we observe only the coupon or also the early redemption). 
