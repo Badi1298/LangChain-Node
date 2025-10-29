@@ -1,20 +1,16 @@
 const express = require("express");
-const upload = require("../middleware/upload");
 const router = express.Router();
+const upload = require("../middleware/upload");
+const parsePdfController = require("../controllers/parsePdfController");
 
-const productDetailsController = require("../controllers/productDetailsController");
-const productInformationController = require("../controllers/productInformationController");
+// POST route for uploading and parsing PDF files
+router.post("/precomplete", upload.single("pdf"), parsePdfController.parseUploadedPdf);
 
+// POST route for uploading and parsing PDF files with custom model and prompt
 router.post(
-  "/parse-product-information-termsheet",
-  upload.single("pdf"),
-  productInformationController.parseProductInformationTermsheet
-);
-
-router.post(
-  "/parse-product-details-termsheet",
-  upload.single("pdf"),
-  productDetailsController.parseProductDetailsTermsheet
+	"/precomplete/custom",
+	upload.single("pdf"),
+	parsePdfController.parseUploadedPdfWithCustomPrompt
 );
 
 module.exports = router;
