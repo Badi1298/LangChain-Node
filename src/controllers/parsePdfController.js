@@ -1,7 +1,5 @@
 const fs = require("fs");
 const pdf = require("pdf-parse");
-const path = require("path");
-const { createFile, vectoriseFile } = require("../services/openaiVectoriseFile");
 const openaiInstance = require("../services/openaiClient");
 
 /**
@@ -200,65 +198,41 @@ const parsePdfController = {
 			const { model, prompt } = req.body;
 
 			if (!model || !prompt) {
-				fs.unlinkSync(req.file.path);
 				return res.status(400).json({
 					success: false,
 					error: "Model and prompt are required in the request body.",
 				});
 			}
 
-			const filePath = req.file.path;
-			const originalName = req.file.originalname;
+			const dataBuffer = fs.readFileSync(req.file.path);
 
-			// Create file in OpenAI and vectorise it
-			console.log("Creating file in OpenAI...");
-			let startTime = performance.now();
-			const fileId = await createFile(filePath);
-			let endTime = performance.now();
-			console.log(`File created with ID: ${fileId}. Time taken: ${endTime - startTime}ms`);
+			const pdfData = await pdf(dataBuffer);
+			const pdfText = pdfData.text;
 
-			console.log("Vectorising file...");
-			startTime = performance.now();
-			const vectorStoreId = await vectoriseFile(fileId);
-			endTime = performance.now();
+			// Log token count estimation (approximate)
+			const tokenCount = Math.ceil(pdfText.length / 4); // Rough approximation: 1 token ≈ 4 characters
+			console.log(`PDF text length: ${pdfText.length} characters`);
+			console.log(`Estimated token count: ${tokenCount} tokens`);
 			console.log(
-				`File vectorised. Vector store ID: ${vectorStoreId}. Time taken: ${
-					endTime - startTime
-				}ms`
+				`Estimated cost (GPT-5): $${(tokenCount * 0.000002).toFixed(
+					6
+				)} input + output tokens`
 			);
 
-			console.log("Getting response from OpenAI...");
-			startTime = performance.now();
-
 			const response = await openaiInstance.responses.create({
-				model: model,
+				model,
+				reasoning: { effort: "low" },
+				text: { verbosity: "low" },
 				input: prompt,
-				tools: [
-					{
-						type: "file_search",
-						vector_store_ids: [vectorStoreId],
-					},
-				],
 			});
-			endTime = performance.now();
-			console.log(`Got response from OpenAI. Time taken: ${endTime - startTime}ms`);
-
-			const overallEndTime = performance.now();
-			console.log(`Total time taken: ${overallEndTime - startTime}ms`);
 
 			res.status(200).json({
 				success: true,
-				message: "PDF file processed and vectorised successfully with custom prompt",
-				data: {
-					fileName: originalName,
-					filePath: filePath,
-					fileId: fileId,
-					vectorStoreId: vectorStoreId,
-					output_text: response.output_text,
-				},
+				message: "Details processed successfully.",
+				data: response.output_text,
 			});
 		} catch (error) {
-			console.error("Error processing PDF with custom prompt:", error);
+			console.error("Error processing PDF:", error);
 
 			// Clean up uploaded file in case of error
 			if (req.file && req.file.path) {
@@ -271,7 +245,7 @@ const parsePdfController = {
 
 			res.status(500).json({
 				success: false,
-				error: "Internal server error while processing PDF with custom prompt",
+				error: "Internal server error while processing PDF",
 			});
 		}
 	},
