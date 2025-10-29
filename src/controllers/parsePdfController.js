@@ -49,8 +49,9 @@ const parsePdfController = {
 			);
 
 			const response = await openaiInstance.responses.create({
-				model: "gpt-4.1",
-				// text: { verbosity: "low" },
+				model: "gpt-5",
+				reasoning: { effort: "low" },
+				text: { verbosity: "low" },
 				input: `
 				You are an expert financial analyst. 
 				Your task is to extract information from the provided document text and return *only* a single, valid JSON object (no '''json flags are needed). 
@@ -141,7 +142,6 @@ const parsePdfController = {
 							"observationDate": null,
 							"paymentDate": null,
 							"autocallTriggerLevel": null,
-							"observationType": null
 						}
 					]
 				}
