@@ -38,16 +38,6 @@ const parsePdfController = {
 			const pdfData = await pdf(dataBuffer);
 			const pdfText = pdfData.text;
 
-			// Log token count estimation (approximate)
-			const tokenCount = Math.ceil(pdfText.length / 4); // Rough approximation: 1 token ≈ 4 characters
-			console.log(`PDF text length: ${pdfText.length} characters`);
-			console.log(`Estimated token count: ${tokenCount} tokens`);
-			console.log(
-				`Estimated cost (GPT-5): $${(tokenCount * 0.000002).toFixed(
-					6
-				)} input + output tokens`
-			);
-
 			const response = await openaiInstance.responses.create({
 				model: "gpt-5",
 				reasoning: { effort: "low" },
