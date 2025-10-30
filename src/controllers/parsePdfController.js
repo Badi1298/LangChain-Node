@@ -13,25 +13,27 @@ const parsePdfController = {
 	 */
 	parseUploadedPdf: async (req, res) => {
 		try {
-			// Check if file was uploaded
-			if (!req.file) {
+			const { src, ext } = req.body;
+
+			// Check if file data was provided
+			if (!src) {
 				return res.status(400).json({
 					success: false,
-					error: "No file uploaded. Please provide a PDF file.",
+					error: "No file data provided. Please provide a base64 encoded file.",
 				});
 			}
 
-			// Check if uploaded file is a PDF
-			if (req.file.mimetype !== "application/pdf") {
-				// Clean up the uploaded file if it's not a PDF
-				fs.unlinkSync(req.file.path);
+			// Check if the file is a PDF
+			if (ext !== "pdf") {
 				return res.status(400).json({
 					success: false,
-					error: "Invalid file type. Please upload a PDF file.",
+					error: "Invalid file type. Please provide a PDF file.",
 				});
 			}
 
-			const dataBuffer = fs.readFileSync(req.file.path);
+			// Convert base64 to buffer
+			const base64Data = src.split(";base64,").pop();
+			const dataBuffer = Buffer.from(base64Data, "base64");
 
 			const pdfData = await pdf(dataBuffer);
 			const pdfText = pdfData.text;
@@ -154,15 +156,6 @@ const parsePdfController = {
 		} catch (error) {
 			console.error("Error processing PDF:", error);
 
-			// Clean up uploaded file in case of error
-			if (req.file && req.file.path) {
-				try {
-					fs.unlinkSync(req.file.path);
-				} catch (cleanupError) {
-					console.error("Error cleaning up file:", cleanupError);
-				}
-			}
-
 			res.status(500).json({
 				success: false,
 				error: "Internal server error while processing PDF",
@@ -177,25 +170,24 @@ const parsePdfController = {
 	 */
 	parseUploadedPdfWithCustomPrompt: async (req, res) => {
 		try {
-			// Check if file was uploaded
-			if (!req.file) {
+			const { model, prompt, file } = req.body;
+			const { src, ext } = file;
+
+			// Check if file data was provided
+			if (!src) {
 				return res.status(400).json({
 					success: false,
-					error: "No file uploaded. Please provide a PDF file.",
+					error: "No file data provided. Please provide a base64 encoded file.",
 				});
 			}
 
-			// Check if uploaded file is a PDF
-			if (req.file.mimetype !== "application/pdf") {
-				// Clean up the uploaded file if it's not a PDF
-				fs.unlinkSync(req.file.path);
+			// Check if the file is a PDF
+			if (ext !== "pdf") {
 				return res.status(400).json({
 					success: false,
-					error: "Invalid file type. Please upload a PDF file.",
+					error: "Invalid file type. Please provide a PDF file.",
 				});
 			}
-
-			const { model, prompt } = req.body;
 
 			if (!model || !prompt) {
 				return res.status(400).json({
@@ -204,7 +196,9 @@ const parsePdfController = {
 				});
 			}
 
-			const dataBuffer = fs.readFileSync(req.file.path);
+			// Convert base64 to buffer
+			const base64Data = src.split(";base64,").pop();
+			const dataBuffer = Buffer.from(base64Data, "base64");
 
 			const pdfData = await pdf(dataBuffer);
 			const pdfText = pdfData.text;
@@ -233,15 +227,6 @@ const parsePdfController = {
 			});
 		} catch (error) {
 			console.error("Error processing PDF:", error);
-
-			// Clean up uploaded file in case of error
-			if (req.file && req.file.path) {
-				try {
-					fs.unlinkSync(req.file.path);
-				} catch (cleanupError) {
-					console.error("Error cleaning up file:", cleanupError);
-				}
-			}
 
 			res.status(500).json({
 				success: false,
