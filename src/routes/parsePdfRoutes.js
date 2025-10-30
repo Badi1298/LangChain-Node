@@ -4,11 +4,11 @@ const upload = require("../middleware/upload");
 const parsePdfController = require("../controllers/parsePdfController");
 
 // POST route for uploading and parsing PDF files
-router.post("/precomplete", upload.single("pdf"), parsePdfController.parseUploadedPdf);
+router.post("/prefill", parsePdfController.parseUploadedPdf);
 
 // POST route for uploading and parsing PDF files with custom model and prompt
 router.post(
-	"/precomplete/custom",
+	"/prefill/custom",
 	upload.single("pdf"),
 	parsePdfController.parseUploadedPdfWithCustomPrompt
 );
